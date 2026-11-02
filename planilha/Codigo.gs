@@ -55,7 +55,10 @@ function doPost(e) {
   lock.waitLock(20000);
   try {
     const d = JSON.parse(e.postData.contents);
-    const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ABA);
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    if (!ss) return resposta({ ok: false, erro: 'o código não está dentro da planilha (abra pela planilha em Extensões > Apps Script)' });
+    let sh = ss.getSheetByName(ABA);
+    if (!sh) { configurar(); sh = ss.getSheetByName(ABA); }
     const limpa = v => String(v == null ? '' : v).slice(0, 2000).replace(/^[=+\-@]/, "'$&");
     const id = limpa(d.id).slice(0, 40);
     const colId = COLUNAS.length;
