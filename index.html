@@ -14,7 +14,7 @@
 /* Layout: faixa de campanha no topo, vitrine em grade, barra de sacola fixa embaixo, pedido em painel deslizante. Visual único (claro) por escolha: é a paleta da campanha. */
 :root{
   --blush:#F7C6CC; --oliva:#C3CC4E; --militar:#3F5B16; --laranja:#FF6B1A; --vinho:#790808;
-  --papel:#FFFFFF; --cartao:#FFFFFF; --tinta:#263510; --tinta-suave:#5B6A45; --linha:#EDDCDC;
+  --papel:#FFFFFF; --rosa-capa:#FAD7DE; --cartao:#FFFFFF; --tinta:#263510; --tinta-suave:#5B6A45; --linha:#EDDCDC;
   --display:"Borne Celine","Josefin Sans",Georgia,serif;
   --texto:"Josefin Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   /* prévias das letras das peças: aproximações das fontes de produção */
@@ -32,8 +32,9 @@ button{cursor:pointer}
 .demo{background:var(--militar);color:#fff;font-size:13px;font-weight:600}
 .demo .wrap{padding-block:8px}
 
-.topo{position:relative;overflow:hidden;background:#FCF3E6 url("assets/estrelas-capa.webp") center/cover no-repeat}
-.topo::before{content:"";position:absolute;inset:0;background:rgba(255,250,244,.66)}
+.topo{position:relative;overflow:hidden;background:var(--rosa-capa) url("assets/estrelas-capa.webp") center/cover no-repeat}
+.topo::before{content:"";position:absolute;inset:0;background:rgba(250,215,222,.62)}
+.topo .chip{background:#FFFFFF}
 .topo .wrap{position:relative;padding-block:28px 12px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px;align-items:end}
 .topo-txt{display:grid;gap:12px;padding-bottom:28px}
 .marca{font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--militar)}
