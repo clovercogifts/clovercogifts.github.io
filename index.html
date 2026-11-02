@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Encomendas de Natal da Clover: E se…?">
+<meta name="robots" content="noindex">
+<link rel="icon" href="assets/qn-pisca.webp">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>E se…? · Natal Clover</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@400;600;700&family=Playfair+Display:wght@900&family=Allura&display=swap">
+<style>
+/* Layout: faixa de campanha no topo, vitrine em grade, barra de sacola fixa embaixo, pedido em painel deslizante. Visual único (claro) por escolha: é a paleta da campanha. */
+:root{
+  --blush:#F7C6CC; --oliva:#C3CC4E; --militar:#3F5B16; --laranja:#FF6B1A; --vinho:#790808;
+  --papel:#FFFFFF; --cartao:#FFFFFF; --tinta:#263510; --tinta-suave:#5B6A45; --linha:#EDDCDC;
+  --display:"Borne Celine","Josefin Sans",Georgia,serif;
+  --texto:"Josefin Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  /* prévias das letras das peças: aproximações das fontes de produção */
+  --letra-laco:"Allura","Brush Script MT",cursive;
+  --letra-qn:"Playfair Display",Georgia,serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{background:var(--papel);color:var(--tinta);font-family:var(--texto);font-size:16px;line-height:1.5;padding-bottom:96px}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--laranja);outline-offset:2px}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+
+.demo{background:var(--militar);color:#fff;font-size:13px;font-weight:600}
+.demo .wrap{padding-block:8px}
+
+.topo{position:relative;overflow:hidden;background:var(--papel)}
+.topo::before{content:"";position:absolute;inset:0;background:url("assets/estrelas.webp") 0 0/240px 240px;opacity:.35}
+.topo .wrap{position:relative;padding-block:28px 12px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px;align-items:end}
+.topo-txt{display:grid;gap:12px;padding-bottom:28px}
+.marca{font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--militar)}
+.lettering{width:100%;max-width:520px;height:auto;display:block}
+.assina{font-family:var(--display);font-weight:400;font-size:clamp(20px,3vw,26px);color:var(--vinho);margin:0;max-width:26ch;line-height:1.2}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--blush);color:var(--tinta);border-radius:999px;padding:6px 14px;font-size:14px;font-weight:600}
+.qn-topo{width:100%;max-width:340px;justify-self:center;display:block}
+.qn-mov{position:relative;transform-origin:50% 8%}
+.qn-mov img{width:100%;height:auto;display:block}
+.lz{position:absolute;width:7%;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);pointer-events:none;mix-blend-mode:screen;opacity:0;--c:255,120,90}
+.lz.r{--c:255,90,80}.lz.o{--c:255,170,70}.lz.g{--c:205,240,120}.lz.p{--c:255,190,215}
+.lz{background:radial-gradient(circle,rgba(var(--c),.95) 0 22%,rgba(var(--c),.45) 45%,rgba(var(--c),0) 70%)}
+@media (prefers-reduced-motion:no-preference){
+  .lz{animation:pisca 2.6s ease-in-out infinite;animation-delay:var(--d)}
+  .qn-mov{animation:balanca 6s ease-in-out infinite}
+  @keyframes pisca{0%,100%{opacity:0}35%,60%{opacity:1}}
+  @keyframes balanca{0%,100%{transform:rotate(-1.2deg)}50%{transform:rotate(1.2deg)}}
+}
+@media (max-width:640px){.topo .wrap{grid-template-columns:1fr}.qn-topo{max-width:220px;order:-1;margin-bottom:-8px}.topo-txt{padding-bottom:20px}}
+
+.vitrine{padding-block:36px}
+.titulo{font-family:var(--display);font-weight:400;text-transform:lowercase}
+.titulo::first-letter{text-transform:uppercase;font-size:1.35em;color:var(--vinho)}
+.vitrine h2{font-family:var(--display);font-weight:400;font-size:38px;margin:0 0 6px;color:var(--militar)}
+.vitrine .sub{margin:0 0 24px;color:var(--tinta-suave);max-width:60ch}
+.grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
+
+.prod{background:var(--cartao);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--linha)}
+.arte{aspect-ratio:4/3;max-width:100%;width:100%;position:relative;overflow:hidden;background:var(--fundo,#fff);flex:0 0 auto}
+.arte img{position:absolute;top:14px;left:14px;width:calc(100% - 28px);height:calc(100% - 28px);max-width:none;object-fit:contain;display:block}
+.arte .ex{z-index:1}
+.arte .ex{position:absolute;top:10px;left:10px;background:var(--tinta);color:#fff;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:3px 8px;border-radius:6px}
+
+.corpo{padding:18px;display:flex;flex-direction:column;gap:14px;flex:1}
+.corpo h3{margin:0;font-family:var(--display);font-weight:400;font-size:24px;line-height:1.15}
+.corpo p{margin:0;color:var(--tinta-suave);font-size:15px}
+.preco{font-weight:800;font-size:22px;color:var(--militar);font-variant-numeric:tabular-nums}
+.campo{display:grid;gap:6px}
+.rot{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--tinta-suave)}
+.opcoes{display:flex;flex-wrap:wrap;gap:6px}
+.op{border:2px solid var(--linha);background:var(--papel);border-radius:10px;padding:6px 12px;font-weight:600;font-size:14px}
+.op[aria-pressed="true"]{border-color:var(--militar);background:var(--militar);color:#fff}
+.cor{width:34px;height:34px;border-radius:50%;border:3px solid var(--cartao);box-shadow:0 0 0 2px var(--linha);padding:0}
+.cor[aria-pressed="true"]{box-shadow:0 0 0 3px var(--militar)}
+.cor-nome{font-size:13px;color:var(--tinta-suave)}
+input[type=text],input[type=tel],textarea,select{width:100%;border:2px solid var(--linha);border-radius:10px;background:var(--papel);padding:10px 12px}
+input:focus,textarea:focus,select:focus{border-color:var(--militar);outline:none}
+.prev{display:grid;place-items:center;width:132px;height:132px;border-radius:50%;margin:4px auto 0;padding:12px;text-align:center;line-height:1;overflow:hidden;overflow-wrap:anywhere;box-shadow:inset 0 0 0 6px rgba(0,0,0,.06)}
+.prev.bengala{width:100%;height:auto;min-height:58px;border-radius:999px;padding:10px 18px}
+.prev .l1{display:block}
+.prev.laco{font-family:var(--letra-laco);font-size:38px}
+.prev.qn{font-family:var(--letra-qn);font-weight:900;font-size:26px;text-transform:uppercase;letter-spacing:.02em}
+.prev.composto{position:relative}
+.prev.composto .l1{font-family:var(--letra-qn);font-weight:900;font-size:24px;text-transform:uppercase}
+.prev.composto .l2{display:block;font-family:var(--letra-laco);font-size:32px;margin-top:-10px}
+.prev-nota{font-size:12px;color:var(--tinta-suave);text-align:center}
+.sel-cor{display:flex;gap:6px;flex-wrap:wrap}
+.breve{position:absolute;inset:auto 12px 12px 12px;background:rgba(255,255,255,.92);border-radius:10px;padding:6px 10px;font-size:13px;font-weight:600;text-align:center;color:var(--tinta-suave)}
+.arte.sem-foto img{opacity:.35}
+.sem-preco{font-size:16px;font-weight:700;color:var(--tinta-suave)}
+.rodape{padding-block:10px 30px}
+.rodape .wrap{display:flex;align-items:center;gap:18px;flex-wrap:wrap;justify-content:center;text-align:center}
+.rodape img{width:120px;height:auto}
+.rodape p{margin:0;font-family:var(--display);font-weight:400;font-size:20px;color:var(--militar);max-width:28ch}
+.dica{font-size:13px;color:var(--tinta-suave)}
+.linha-add{display:flex;gap:10px;align-items:center;margin-top:auto}
+.qtd{display:flex;align-items:center;border:2px solid var(--linha);border-radius:10px;overflow:hidden}
+.qtd button{width:36px;height:40px;border:0;background:var(--papel);font-size:18px;font-weight:700}
+.qtd span{min-width:28px;text-align:center;font-weight:700;font-variant-numeric:tabular-nums}
+.btn{border:0;border-radius:12px;padding:12px 18px;font-weight:800;font-size:15px;background:var(--vinho);color:#fff;flex:1}
+.btn:hover{filter:brightness(.95)}
+.btn.verde{background:var(--militar)}
+.btn.claro{background:var(--papel);color:var(--militar);border:2px solid var(--militar)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.op-pag{display:flex;align-items:center;gap:8px;border:2px solid var(--linha);border-radius:10px;padding:8px 12px;font-weight:600;font-size:14px;cursor:pointer}
+.op-pag:has(input:checked){border-color:var(--militar)}
+.erro{color:var(--vinho);font-size:13px;font-weight:600}
+
+.barra{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--militar);color:#fff;padding-bottom:env(safe-area-inset-bottom,0px)}
+.barra .wrap{display:flex;align-items:center;gap:14px;padding-block:12px}
+.barra .tot{flex:1;min-width:0}
+.barra .tot small{display:block;opacity:.8;font-size:13px}
+.barra .tot strong{font-size:20px;font-variant-numeric:tabular-nums}
+.barra .btn{flex:0 0 auto;background:var(--oliva);color:var(--tinta)}
+
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--tinta);color:#fff;padding:10px 16px;border-radius:12px;font-weight:600;z-index:30;font-size:14px}
+
+.veu{position:fixed;inset:0;background:rgba(38,53,16,.45);z-index:40}
+.painel{position:fixed;top:0;right:0;bottom:0;width:min(520px,100%);background:var(--papel);z-index:41;overflow-y:auto;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);padding-right:env(safe-area-inset-right,0px)}
+.painel .in{padding:20px max(20px,env(safe-area-inset-left,0px)) 40px 20px;display:grid;gap:22px}
+.cab{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.cab h2{font-family:var(--display);font-weight:400;font-size:30px;margin:0;color:var(--vinho)}
+.fechar{border:0;background:var(--blush);color:var(--tinta);border-radius:999px;width:40px;height:40px;font-size:20px;font-weight:700}
+.passos{display:flex;gap:6px;font-size:13px;font-weight:700}
+.passos span{flex:1;text-align:center;padding:6px 4px;border-radius:8px;background:var(--linha);color:var(--tinta-suave)}
+.passos span.on{background:var(--militar);color:#fff}
+.itens{display:grid;gap:10px}
+.item{background:var(--cartao);border:1px solid var(--linha);border-radius:14px;padding:12px 14px;display:grid;grid-template-columns:1fr auto;gap:4px 12px}
+.item .n{font-weight:700}
+.item .d{font-size:14px;color:var(--tinta-suave);grid-column:1}
+.item .v{font-weight:800;font-variant-numeric:tabular-nums;text-align:right}
+.item .acoes{grid-column:1/-1;display:flex;gap:8px;align-items:center;margin-top:4px}
+.item .acoes .qtd button{height:32px;width:32px}
+.remover{border:0;background:none;color:var(--vinho);font-weight:700;font-size:14px;margin-left:auto}
+.somas{background:var(--cartao);border-radius:14px;padding:14px;display:grid;gap:6px;font-variant-numeric:tabular-nums;border:1px solid var(--linha)}
+.somas div{display:flex;justify-content:space-between}
+.somas .grande{font-size:20px;font-weight:800;color:var(--militar);border-top:2px dashed var(--linha);padding-top:8px}
+.form{display:grid;gap:14px}
+.vazio{text-align:center;padding:30px 10px;color:var(--tinta-suave)}
+.pix{background:var(--cartao);border-radius:16px;padding:18px;display:grid;gap:14px;justify-items:center;border:1px solid var(--linha)}
+.pix .codigo{font-size:12px;word-break:break-all;background:var(--papel);border:1px dashed var(--linha);border-radius:10px;padding:10px;width:100%;font-family:ui-monospace,Menlo,monospace}
+#qr{background:#fff;padding:10px;border-radius:12px}
+#qr img,#qr canvas{display:block}
+.pedido-cod{font-family:var(--texto);font-weight:700;letter-spacing:.04em;font-size:26px;color:var(--militar)}
+.aviso{background:var(--blush);border-radius:12px;padding:12px 14px;font-size:14px}
+.zap{font-size:14px;color:var(--tinta-suave);text-align:center}
+.zap code{font-weight:700;color:var(--tinta)}
+.grupo-btn{display:grid;gap:10px}
+.grupo-btn a.btn{text-align:center;text-decoration:none;display:block}
+
+@media (prefers-reduced-motion:no-preference){
+  .painel{animation:entra .25s ease-out}
+  @keyframes entra{from{transform:translateX(30px);opacity:.6}to{transform:none;opacity:1}}
+}
+</style>
+</head>
+<body>
+
+
+<div class="demo" id="demo"><div class="wrap">Página de demonstração: produtos, preços e Pix são de exemplo. Não faça pagamentos.</div></div>
+
+<header class="topo">
+  <div class="wrap">
+    <div class="topo-txt">
+      <div class="marca">Clover · Natal 2026</div>
+      <img class="lettering" src="assets/lettering.webp" width="900" height="493" alt="E se…?">
+      <p class="assina">O Natal saiu do roteiro.</p>
+      <div class="chips">
+        <span class="chip" id="chip-prazo">Pedidos até 23 de dezembro</span>
+      </div>
+    </div>
+    <div class="qn-topo"><div class="qn-mov"><img src="assets/qn-pisca.webp" width="560" height="762" alt="Quebra-nozes enrolado no pisca-pisca"><i class="lz g" style="left:54.82%;top:8.53%;--d:0.00s"></i><i class="lz p" style="left:27.86%;top:19.03%;--d:0.37s"></i><i class="lz o" style="left:58.39%;top:17.85%;--d:0.74s"></i><i class="lz r" style="left:88.21%;top:18.37%;--d:1.11s"></i><i class="lz p" style="left:80.54%;top:25.20%;--d:1.48s"></i><i class="lz g" style="left:25.00%;top:27.82%;--d:1.85s"></i><i class="lz r" style="left:26.43%;top:35.17%;--d:2.22s"></i><i class="lz g" style="left:70.71%;top:32.28%;--d:2.59s"></i><i class="lz g" style="left:92.50%;top:30.97%;--d:0.36s"></i><i class="lz p" style="left:91.43%;top:37.01%;--d:0.73s"></i><i class="lz r" style="left:78.57%;top:42.26%;--d:1.10s"></i><i class="lz p" style="left:55.00%;top:39.63%;--d:1.47s"></i><i class="lz o" style="left:65.71%;top:43.18%;--d:1.84s"></i><i class="lz p" style="left:26.96%;top:42.52%;--d:2.21s"></i><i class="lz o" style="left:14.46%;top:52.89%;--d:2.58s"></i><i class="lz g" style="left:25.00%;top:55.64%;--d:0.35s"></i><i class="lz g" style="left:34.82%;top:51.97%;--d:0.72s"></i><i class="lz p" style="left:39.64%;top:55.25%;--d:1.09s"></i><i class="lz o" style="left:40.36%;top:62.60%;--d:1.46s"></i><i class="lz r" style="left:37.14%;top:71.13%;--d:1.83s"></i><i class="lz p" style="left:55.18%;top:66.27%;--d:2.20s"></i><i class="lz p" style="left:72.14%;top:59.06%;--d:2.57s"></i><i class="lz p" style="left:59.11%;top:70.87%;--d:0.34s"></i><i class="lz g" style="left:60.89%;top:75.33%;--d:0.71s"></i><i class="lz r" style="left:77.14%;top:75.20%;--d:1.08s"></i><i class="lz p" style="left:52.50%;top:79.27%;--d:1.45s"></i><i class="lz o" style="left:63.93%;top:83.99%;--d:1.82s"></i><i class="lz r" style="left:52.32%;top:90.94%;--d:2.19s"></i><i class="lz r" style="left:14.64%;top:86.22%;--d:2.56s"></i><i class="lz p" style="left:32.14%;top:88.32%;--d:0.33s"></i><i class="lz p" style="left:32.14%;top:93.44%;--d:0.70s"></i><i class="lz g" style="left:32.50%;top:81.63%;--d:1.07s"></i><i class="lz g" style="left:3.21%;top:92.52%;--d:1.44s"></i><i class="lz o" style="left:18.75%;top:97.77%;--d:1.81s"></i><i class="lz r" style="left:91.07%;top:88.19%;--d:2.18s"></i><i class="lz g" style="left:97.32%;top:95.14%;--d:2.55s"></i></div></div>
+  </div>
+</header>
+
+<main class="vitrine">
+  <div class="wrap">
+    <h2 class="titulo">A coleção</h2>
+    <p class="sub">A gente desenhou o elenco. O nome é com você.</p>
+    <div class="grade" id="grade"></div>
+  </div>
+</main>
+
+<section class="rodape"><div class="wrap"><img src="assets/qn-praia.webp" width="520" height="825" alt="" loading="lazy"><p>E se o Natal saísse do roteiro?</p><img src="assets/laco-laranja.webp" width="220" height="265" alt="" loading="lazy" style="width:70px"></div></section>
+
+<div class="barra" id="barra">
+  <div class="wrap">
+    <div class="tot"><small id="barra-qtd">Sacola vazia</small><strong id="barra-total">R$ 0,00</strong></div>
+    <button class="btn" id="abrir" disabled>Ver pedido</button>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+<div class="veu" id="veu" hidden></div>
+<aside class="painel" id="painel" hidden aria-label="Seu pedido">
+  <div class="in" id="painel-in"></div>
+</aside>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+/* ===== CONFIGURAÇÃO (trocar pelos dados reais) ===== */
+const CONFIG = {
+  demo: true,                       // false quando os dados forem reais
+  pixChave: "clover.exemplo@email.com",
+  pixNome: "CLOVER CO",             // titular da conta (até 25 letras)
+  pixCidade: "CASCAVEL",            // até 15 letras
+  whatsapp: "5545998621326",        // DDI + DDD + número, só dígitos (TESTE: Muri)
+  whatsappExibir: "(45) 99862-1326",
+  planilha: "",                     // URL do App da Web do Google Apps Script
+  prazo: "23 de dezembro",
+  entregas: [
+    {id:"retirada", label:"Retirar no ateliê", taxa:0},
+    {id:"envio", label:"Envio pelo correio", taxa:0, obs:"frete combinado no WhatsApp"}
+  ]
+};
+
+/* ===== CORES DE FILAMENTO (campanha) ===== */
+const FIL = [
+  {n:"Rosa pastel",h:"#F7CFE0"},{n:"Verde oliva candy",h:"#8FA867"},{n:"Verde oliva",h:"#3E4A33"},{n:"Bordô silk",h:"#9E1F3F"},
+  {n:"Vermelho",h:"#D23A2A"},{n:"Laranja",h:"#F97A12"},{n:"Branco",h:"#F5F5F2"},{n:"Bege",h:"#E6D6BA"}
+];
+const hexFil = n => (FIL.find(f=>f.n===n)||{h:"#ccc"}).h;
+const LETRAS = [{id:"laco",label:"Laço",dica:"cursiva"},{id:"qn",label:"Quebra-nozes",dica:"maiúsculas"},{id:"composto",label:"Composto",dica:"2 nomes"}];
+
+/* ===== PRODUTOS =====
+   preco:null = preço ainda não definido (aparece, mas não entra na sacola)
+   foto:false = sem foto do produto real ainda */
+const PRODUTOS = [
+  {id:"bola", nome:"Bola com nome", desc:"Bola plana impressa em 3D. Até 2 linhas, cerca de 9 letras por linha.", img:"bolas.webp", foto:true, fundo:"#FBF6EE",
+   tamanhos:[{id:"u",label:"Tamanho único",preco:null}], peca:"bola", maxLetras:9, linhas:2},
+  {id:"bengala", nome:"Bengala com nome", desc:"Bengala impressa em 3D para pendurar. Um nome, até 9 letras. Nome maior vai na bola.", img:"bengala.webp", foto:true, fundo:"#FFF1F3",
+   tamanhos:[{id:"u",label:"Tamanho único",preco:null}], peca:"bengala", maxLetras:9, linhas:1},
+  {id:"art-m", nome:"Quebra-nozes articulado M · trio", desc:"Três quebra-nozes com pernas articuladas, nas cores da campanha.", img:"qn-chiclete.webp", foto:false, fundo:"#FFFFFF",
+   tamanhos:[{id:"trio",label:"Trio",preco:30}], opcao:{id:"uso",rot:"Uso",vals:["Decorativo","Pingente"]}},
+  {id:"art-p", nome:"Quebra-nozes articulado P · trio", desc:"A versão menor do articulado. Boa para completar o pacote de presente.", img:"qn-picole.webp", foto:false, fundo:"#FFFFFF",
+   tamanhos:[{id:"trio",label:"Trio",preco:27}], opcao:{id:"uso",rot:"Uso",vals:["Decorativo","Pingente"]}},
+  {id:"ping", nome:"Pingente quebra-nozes 10 cm · trio", desc:"Três pingentes de 10 cm para pendurar na árvore.", img:"qn-praia.webp", foto:false, fundo:"#FFFFFF",
+   tamanhos:[{id:"trio",label:"Trio",preco:30}]}
+];
+
+/* ===== util ===== *//* ===== util ===== */
+const $ = s => document.querySelector(s);
+const brl = v => v.toLocaleString("pt-BR",{style:"currency",currency:"BRL"});
+const esc = s => String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const semAcento = s => s.normalize("NFD").replace(/[̀-ͯ]/g,"");
+function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTimeout(toast._t);toast._t=setTimeout(()=>t.hidden=true,2200);}
+
+/* ===== estado ===== */
+const escolha = {};
+PRODUTOS.forEach(p=>escolha[p.id]={tam:p.tamanhos[0].id,op:p.opcao?p.opcao.vals[0]:"",fundo:"Rosa pastel",cornome:"Bordô silk",letra:"laco",nome:"",nome2:"",qtd:1});
+let sacola = [];
+let etapa = "sacola"; // sacola | dados | pagar
+let cliente = {nome:"",fone:"",entrega:"retirada",obs:"",pagamento:"pix"};
+let pedido = null;
+const prod = id => PRODUTOS.find(p=>p.id===id);
+const precoDe = (p,tam) => (p.tamanhos.find(t=>t.id===tam)||p.tamanhos[0]).preco;
+try{const s=JSON.parse(localStorage.getItem("ese-sacola2")||"null");if(Array.isArray(s))sacola=s.filter(i=>prod(i.pid)&&precoDe(prod(i.pid),i.tam)!=null);}catch(e){}
+try{const c=JSON.parse(localStorage.getItem("ese-cliente")||"null");if(c)cliente=Object.assign(cliente,c);}catch(e){}
+function salvar(){if(etapa!=="pagar")pedido=pedido&&etapa==="dados"?pedido:null;try{localStorage.setItem("ese-sacola2",JSON.stringify(sacola));localStorage.setItem("ese-cliente",JSON.stringify(cliente));}catch(e){}}
+
+const precoItem = i => precoDe(prod(i.pid),i.tam);
+const subtotal = () => sacola.reduce((s,i)=>s+precoItem(i)*i.qtd,0);
+const totalQtd = () => sacola.reduce((s,i)=>s+i.qtd,0);
+
+/* ===== vitrine ===== */
+function previewHTML(p,e){
+  const st=`background:${hexFil(e.fundo)};color:${hexFil(e.cornome)}`;
+  const cls=`prev ${p.peca==="bengala"?"bengala":""} ${p.peca==="bengala"?"laco":e.letra}`;
+  if(p.peca==="bola"&&e.letra==="composto")
+    return `<div class="${cls}" style="${st}"><span><span class="l1">${esc(e.nome||"Maria")}</span><span class="l2">${esc(e.nome2||"Eduarda")}</span></span></div>`;
+  return `<div class="${cls}" style="${st}"><span class="l1">${esc(e.nome||"Seu nome")}</span></div>`;
+}
+function selCor(p,campo,rot,e){
+  return `<div class="campo"><span class="rot">${rot}: <span style="text-transform:none;letter-spacing:0">${esc(e[campo])}</span></span>
+    <div class="sel-cor">${FIL.map(f=>`<button class="cor" data-campo="${campo}" data-v="${esc(f.n)}" style="background:${f.h}" aria-label="${esc(f.n)}" aria-pressed="${f.n===e[campo]}" title="${esc(f.n)}"></button>`).join("")}</div></div>`;
+}
+function cardHTML(p){
+  const e=escolha[p.id];
+  const preco=precoDe(p,e.tam);
+  const nomes=p.peca?`
+      ${p.peca==="bola"?`<div class="campo"><span class="rot">Letra</span><div class="opcoes">${LETRAS.map(l=>`<button class="op" data-letra="${l.id}" aria-pressed="${l.id===e.letra}">${l.label} <small>· ${l.dica}</small></button>`).join("")}</div></div>`:""}
+      <div class="campo"><label class="rot" for="nome-${p.id}">${p.peca==="bola"&&e.letra==="composto"?"1º nome":"Nome"}</label>
+        <input type="text" id="nome-${p.id}" data-n="nome" maxlength="${p.peca==="bola"&&e.letra!=="composto"?19:p.maxLetras}" value="${esc(e.nome)}" placeholder="${p.peca==="bengala"?"Até 9 letras":"Até 2 linhas de 9 letras"}" autocomplete="off"></div>
+      ${p.peca==="bola"&&e.letra==="composto"?`<div class="campo"><label class="rot" for="nome2-${p.id}">2º nome</label><input type="text" id="nome2-${p.id}" data-n="nome2" maxlength="9" value="${esc(e.nome2)}" autocomplete="off"></div>`:""}
+      ${selCor(p,"fundo","Cor da peça",e)}
+      ${selCor(p,"cornome","Cor do nome",e)}
+      ${previewHTML(p,e)}
+      <span class="prev-nota">Prévia aproximada. A letra e a cor do filamento podem variar um pouco.</span>
+      <span class="erro" hidden></span>`:"";
+  return `
+  <article class="prod" data-id="${p.id}">
+    <div class="arte ${p.foto?"":"sem-foto"}" style="--fundo:${p.fundo}"><img src="assets/${p.img}" alt="${esc(p.nome)}" loading="lazy">${p.foto?"":'<span class="breve">Foto da peça em breve</span>'}</div>
+    <div class="corpo">
+      <h3>${esc(p.nome)}</h3>
+      <p>${esc(p.desc)}</p>
+      ${preco==null?'<div class="sem-preco">Preço em breve</div>':`<div class="preco">${brl(preco)}</div>`}
+      ${p.opcao?`<div class="campo"><span class="rot">${esc(p.opcao.rot)}</span><div class="opcoes">${p.opcao.vals.map(v=>`<button class="op" data-op="${esc(v)}" aria-pressed="${v===e.op}">${esc(v)}</button>`).join("")}</div></div>`:""}
+      ${nomes}
+      <div class="linha-add">
+        <div class="qtd"><button data-q="-1" aria-label="Diminuir">−</button><span>${e.qtd}</span><button data-q="1" aria-label="Aumentar">+</button></div>
+        <button class="btn add" ${preco==null?"disabled":""}>${preco==null?"Em breve":"Colocar na sacola"}</button>
+      </div>
+    </div>
+  </article>`;
+}
+function renderGrade(){ $("#grade").innerHTML=PRODUTOS.map(cardHTML).join(""); }
+function rerenderCard(id,foco){
+  const old=document.querySelector(`.prod[data-id="${id}"]`);
+  const tmp=document.createElement("div");tmp.innerHTML=cardHTML(prod(id)).trim();
+  old.replaceWith(tmp.firstChild);
+}
+function validar(p,e){
+  if(!p.peca)return "";
+  const n=e.nome.trim(),n2=e.nome2.trim();
+  if(!n)return "Escreva o nome.";
+  if(e.fundo===e.cornome)return "Escolha cores diferentes para a peça e o nome, senão o nome some.";
+  if(p.peca==="bengala"){
+    if(/\s/.test(n))return "A bengala leva um nome só. Para dois nomes, escolha a bola.";
+    if(n.length>9)return "Esse nome passa de 9 letras. Ele fica melhor na bola.";
+  }else{
+    if(e.letra==="composto"){if(!n2)return "Escreva o 2º nome.";if(n.length>9||n2.length>9)return "Cada nome pode ter até 9 letras.";}
+    else{const pal=n.split(/\s+/);if(pal.length>2)return "Na bola cabem até 2 linhas.";if(pal.some(w=>w.length>9))return "Cada linha pode ter até 9 letras.";}
+  }
+  return "";
+}
+$("#grade").addEventListener("click",ev=>{
+  const card=ev.target.closest(".prod");if(!card)return;
+  const id=card.dataset.id,e=escolha[id],p=prod(id);
+  const b=ev.target.closest("button");if(!b)return;
+  if(b.dataset.tam){e.tam=b.dataset.tam;rerenderCard(id);}
+  else if(b.dataset.op){e.op=b.dataset.op;rerenderCard(id);}
+  else if(b.dataset.letra){e.letra=b.dataset.letra;rerenderCard(id);}
+  else if(b.dataset.campo){e[b.dataset.campo]=b.dataset.v;rerenderCard(id);}
+  else if(b.dataset.q){e.qtd=Math.max(1,Math.min(50,e.qtd+Number(b.dataset.q)));rerenderCard(id);}
+  else if(b.classList.contains("add")){
+    if(precoDe(p,e.tam)==null)return;
+    const erro=validar(p,e);
+    if(erro){const er=card.querySelector(".erro");er.textContent=erro;er.hidden=false;return;}
+    const item={pid:id,tam:e.tam,op:e.op,qtd:e.qtd};
+    if(p.peca)Object.assign(item,{fundo:e.fundo,cornome:e.cornome,letra:p.peca==="bola"?e.letra:"laco",nome:e.nome.trim(),nome2:p.peca==="bola"&&e.letra==="composto"?e.nome2.trim():""});
+    const chave=JSON.stringify({...item,qtd:0});
+    const ex=sacola.find(i=>JSON.stringify({...i,qtd:0})===chave);
+    if(ex)ex.qtd+=e.qtd;else sacola.push(item);
+    e.qtd=1;e.nome="";e.nome2="";rerenderCard(id);salvar();renderBarra();toast("Na sacola: "+p.nome);
+  }
+});
+$("#grade").addEventListener("input",ev=>{
+  const t=ev.target;if(!t.matches("input[type=text]"))return;
+  const card=t.closest(".prod"),id=card.dataset.id,e=escolha[id],p=prod(id);
+  e[t.dataset.n]=t.value;
+  const pv=card.querySelector(".prev");if(pv){const tmp=document.createElement("div");tmp.innerHTML=previewHTML(p,e);pv.replaceWith(tmp.firstChild);}
+  const er=card.querySelector(".erro");if(er)er.hidden=true;
+});
+
+/* ===== barra ===== */
+function renderBarra(){
+  const q=totalQtd();
+  $("#barra-qtd").textContent=q?`${q} ${q===1?"item":"itens"} na sacola`:"Sacola vazia";
+  $("#barra-total").textContent=brl(subtotal());
+  $("#abrir").disabled=!q;
+}
+
+/* ===== painel ===== */
+function abrir(){etapa=pedido?"pagar":"sacola";$("#veu").hidden=false;$("#painel").hidden=false;renderPainel();$("#painel .fechar")?.focus();}
+function fechar(){$("#veu").hidden=true;$("#painel").hidden=true;}
+$("#abrir").onclick=abrir;$("#veu").onclick=fechar;
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#painel").hidden)fechar();});
+
+function passos(){const ps=[["sacola","Sacola"],["dados","Seus dados"],["pagar","Pagamento"]];return `<div class="passos">${ps.map(([k,l])=>`<span class="${k===etapa?"on":""}">${l}</span>`).join("")}</div>`;}
+function descItem(i){const p=prod(i.pid);const partes=[];if(i.op)partes.push(i.op);if(p.peca){const L=LETRAS.find(l=>l.id===i.letra);partes.push(`Nome: ${i.nome}${i.nome2?" "+i.nome2:""}`);if(p.peca==="bola"&&L)partes.push(`letra ${L.label}`);partes.push(`peça ${i.fundo}, nome ${i.cornome}`);}return partes.join(" · ");}
+function somasHTML(){
+  const ent=CONFIG.entregas.find(x=>x.id===cliente.entrega);
+  return `<div class="somas"><div><span>Produtos</span><span>${brl(subtotal())}</span></div>
+  ${etapa!=="sacola"&&ent?`<div><span>${esc(ent.label)}</span><span>${ent.obs?esc(ent.obs):(ent.taxa?brl(ent.taxa):"sem custo")}</span></div>`:""}
+  <div class="grande"><span>Total</span><span>${brl(total())}</span></div></div>`;
+}
+function total(){const ent=CONFIG.entregas.find(x=>x.id===cliente.entrega);return subtotal()+(etapa!=="sacola"&&ent?ent.taxa:0);}
+
+function renderPainel(){
+  const el=$("#painel-in");
+  let h=`<div class="cab"><h2 class="titulo">Seu pedido</h2><button class="fechar" aria-label="Fechar">×</button></div>${passos()}`;
+  if(etapa==="sacola"){
+    if(!sacola.length){h+=`<div class="vazio">Sua sacola está vazia.<br>Escolha uma peça na coleção.</div>`;}
+    else{
+      h+=`<div class="itens">${sacola.map((i,k)=>`<div class="item"><span class="n">${esc(prod(i.pid).nome)}</span><span class="v">${brl(precoItem(i)*i.qtd)}</span><span class="d">${esc(descItem(i))}</span>
+      <div class="acoes"><div class="qtd"><button data-k="${k}" data-q="-1" aria-label="Diminuir">−</button><span>${i.qtd}</span><button data-k="${k}" data-q="1" aria-label="Aumentar">+</button></div><button class="remover" data-rm="${k}">Remover</button></div></div>`).join("")}</div>
+      ${somasHTML()}<button class="btn verde" id="ir-dados">Continuar</button>`;
+    }
+  }else if(etapa==="dados"){
+    h+=`<form class="form" id="form-dados" novalidate>
+      <div class="campo"><label class="rot" for="c-nome">Seu nome</label><input type="text" id="c-nome" required value="${esc(cliente.nome)}" autocomplete="name"></div>
+      <div class="campo"><label class="rot" for="c-fone">WhatsApp</label><input type="tel" id="c-fone" required value="${esc(cliente.fone)}" placeholder="(45) 9 9999-9999" autocomplete="tel"></div>
+      <div class="campo"><label class="rot" for="c-ent">Como quer receber</label><select id="c-ent">${CONFIG.entregas.map(x=>`<option value="${x.id}" ${x.id===cliente.entrega?"selected":""}>${esc(x.label)}</option>`).join("")}</select></div>
+      <div class="campo"><label class="rot" for="c-obs">Observações (opcional)</label><textarea id="c-obs" rows="3" placeholder="Endereço, data que precisa, algum detalhe…">${esc(cliente.obs)}</textarea></div>
+      <div class="campo"><span class="rot">Pagamento</span>
+        <div class="opcoes" role="radiogroup">
+          <label class="op-pag"><input type="radio" name="pag" value="pix" ${cliente.pagamento==="pix"?"checked":""}> Pix agora</label>
+          <label class="op-pag"><input type="radio" name="pag" value="outra" ${cliente.pagamento==="outra"?"checked":""}> Combinar outra forma</label>
+        </div>
+      </div>
+      <span class="erro" id="erro-dados" hidden>Preencha seu nome e WhatsApp.</span>
+      ${somasHTML()}
+      <div class="grupo-btn"><a class="btn" id="finalizar" href="https://wa.me/${CONFIG.whatsapp}" target="_blank" rel="noopener">Finalizar pedido no WhatsApp</a>
+      <span class="dica" style="text-align:center">O WhatsApp abre com o resumo pronto. É só tocar em enviar.</span>
+      <button class="btn claro" type="button" id="voltar">Voltar para a sacola</button></div>
+    </form>`;
+  }else if(etapa==="pagar"&&pedido){
+    const pix=cliente.pagamento==="pix";
+    h+=`<div class="aviso"><strong>Confirme que tocou em enviar no WhatsApp.</strong> Seu pedido só chega até nós quando a mensagem é enviada.</div>`;
+    if(pix){
+    h+=`<div class="pix">
+      <span class="rot">Pedido</span><span class="pedido-cod">${pedido.cod}</span>
+      <div class="preco">${brl(pedido.total)}</div>
+      ${CONFIG.demo?`<div class="aviso"><strong>Pix de demonstração.</strong> Não pague: a chave ainda não é a real.</div>`:""}
+      <div id="qr" aria-label="QR Code do Pix"></div>
+      <span class="rot">Pix copia e cola</span>
+      <div class="codigo" id="pix-txt">${esc(pedido.pix)}</div>
+      <button class="btn verde" id="copiar">Copiar código Pix</button>
+    </div>
+    <div class="aviso">Depois de pagar, mande o comprovante na mesma conversa. A produção começa quando confirmarmos o pagamento e a grafia dos nomes.</div>`;
+    }else{
+    h+=`<div class="pix"><span class="rot">Pedido</span><span class="pedido-cod">${pedido.cod}</span><div class="preco">${brl(pedido.total)}</div>
+      <p style="margin:0;text-align:center">Vamos combinar o pagamento pelo WhatsApp.</p></div>`;
+    }
+    h+=`<div class="grupo-btn">
+      <a class="btn claro" href="${zapLink()}" target="_blank" rel="noopener">Abrir o WhatsApp de novo</a>
+      <button class="btn claro" id="copiar-msg">Copiar mensagem do pedido</button>
+    </div>
+    <p class="zap">Se o WhatsApp não abrir, mande a mensagem para <code>${esc(CONFIG.whatsappExibir)}</code>.</p>
+    <button class="btn claro" id="novo">Fazer outro pedido</button>`;
+  }
+  el.innerHTML=h;
+  if(etapa==="pagar"&&pedido&&window.QRCode){try{new QRCode($("#qr"),{text:pedido.pix,width:200,height:200,correctLevel:QRCode.CorrectLevel.M});}catch(e){}}
+}
+
+$("#painel").addEventListener("click",ev=>{
+  const b=ev.target.closest("button");if(!b)return;
+  if(b.classList.contains("fechar"))return fechar();
+  if(b.dataset.q&&b.dataset.k!==undefined){const i=sacola[+b.dataset.k];i.qtd=Math.max(1,Math.min(50,i.qtd+Number(b.dataset.q)));salvar();renderBarra();renderPainel();}
+  else if(b.dataset.rm!==undefined){sacola.splice(+b.dataset.rm,1);salvar();renderBarra();renderPainel();if(!sacola.length)setTimeout(fechar,600);}
+  else if(b.id==="ir-dados"){etapa="dados";renderPainel();}
+  else if(b.id==="voltar"){lerDados();pedido=null;etapa="sacola";renderPainel();}
+  else if(b.id==="copiar")copiar(pedido.pix,"Código Pix copiado","#pix-txt");
+  else if(b.id==="copiar-msg")copiar(mensagem(),"Mensagem copiada");
+  else if(b.id==="novo"){pedido=null;sacola=[];salvar();renderBarra();fechar();toast("Sacola limpa");}
+});
+$("#painel").addEventListener("submit",ev=>ev.preventDefault());
+$("#painel").addEventListener("click",ev=>{
+  const a=ev.target.closest("#finalizar");if(!a)return;
+  lerDados();
+  if(!cliente.nome.trim()||cliente.fone.replace(/\D/g,"").length<10){ev.preventDefault();$("#erro-dados").hidden=false;$("#c-nome").focus();return;}
+  salvar();
+  if(!pedido)criarPedido();
+  a.href=zapLink();
+  enviarPlanilha();
+  setTimeout(()=>{etapa="pagar";renderPainel();},400);
+});
+function lerDados(){const f=$("#form-dados");if(!f)return;cliente.nome=$("#c-nome").value;cliente.fone=$("#c-fone").value;cliente.entrega=$("#c-ent").value;cliente.obs=$("#c-obs").value;const pg=document.querySelector("input[name=pag]:checked");cliente.pagamento=pg?pg.value:"pix";}
+
+function copiar(txt,ok,sel){
+  navigator.clipboard.writeText(txt).then(()=>toast(ok)).catch(()=>{
+    if(sel){const r=document.createRange();r.selectNodeContents($(sel));const s=getSelection();s.removeAllRanges();s.addRange(r);}
+    toast("Selecione e copie manualmente");
+  });
+}
+
+/* ===== pedido + Pix ===== */
+function criarPedido(){
+  const d=new Date();
+  const cod="ESE-"+String(d.getDate()).padStart(2,"0")+String(d.getMonth()+1).padStart(2,"0")+"-"+Math.random().toString(36).slice(2,6).toUpperCase();
+  const tot=total();
+  pedido={cod,total:tot,pix:pixPayload(tot,cod.replace(/-/g,""))};
+}
+function tlv(id,v){return id+String(v.length).padStart(2,"0")+v;}
+function crc16(s){let c=0xFFFF;for(let i=0;i<s.length;i++){c^=s.charCodeAt(i)<<8;for(let j=0;j<8;j++){c=(c&0x8000)?((c<<1)^0x1021):(c<<1);c&=0xFFFF;}}return c.toString(16).toUpperCase().padStart(4,"0");}
+function pixPayload(valor,txid){
+  const nome=semAcento(CONFIG.pixNome).toUpperCase().slice(0,25);
+  const cidade=semAcento(CONFIG.pixCidade).toUpperCase().slice(0,15);
+  let p=tlv("00","01")+tlv("26",tlv("00","br.gov.bcb.pix")+tlv("01",CONFIG.pixChave.trim()))+tlv("52","0000")+tlv("53","986")+tlv("54",valor.toFixed(2))+tlv("58","BR")+tlv("59",nome)+tlv("60",cidade)+tlv("62",tlv("05",txid.slice(0,25)))+"6304";
+  return p+crc16(p);
+}
+function mensagem(){const outra=cliente.pagamento==="outra";
+  const ent=CONFIG.entregas.find(x=>x.id===cliente.entrega);
+  const linhas=sacola.map(i=>`• ${i.qtd}x ${prod(i.pid).nome} (${descItem(i)}) = ${brl(precoItem(i)*i.qtd)}`);
+  return [`Olá! Quero fazer meu pedido da coleção *E se…?*`,``,`*Pedido ${pedido.cod}*`,...linhas,``,`*Total: ${brl(pedido.total)}*`,`Entrega: ${ent?ent.label:""}`,``,`Nome: ${cliente.nome}`,`WhatsApp: ${cliente.fone}`,cliente.obs?`Obs.: ${cliente.obs}`:"",``,outra?`Pagamento: quero combinar outra forma.`:`Pagamento: Pix. Vou pagar agora e envio o comprovante aqui.`].filter((l,k,a)=>!(l===""&&a[k-1]==="")).join("\n");
+}
+function enviarPlanilha(){
+  if(!CONFIG.planilha||!pedido||pedido.enviado)return;
+  const ent=CONFIG.entregas.find(x=>x.id===cliente.entrega);
+  const dados={codigo:pedido.cod,cliente:cliente.nome.trim(),whatsapp:cliente.fone.trim(),recebimento:ent?ent.label:"",
+    pagamento:cliente.pagamento,total:pedido.total,obs:cliente.obs.trim(),
+    itens:sacola.map(i=>`${i.qtd}x ${prod(i.pid).nome}${i.op?" ("+i.op+")":""}`).join("\n"),
+    nomes:sacola.filter(i=>i.nome).map(i=>`${prod(i.pid).nome.replace(" com nome","")}: ${i.nome}${i.nome2?" "+i.nome2:""} · letra ${(LETRAS.find(l=>l.id===i.letra)||{}).label||""} · peça ${i.fundo}, nome ${i.cornome}`).join("\n")};
+  try{fetch(CONFIG.planilha,{method:"POST",mode:"no-cors",keepalive:true,headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(dados)});pedido.enviado=true;}catch(e){}
+}
+function zapLink(){return pedido?`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(mensagem())}`:`https://wa.me/${CONFIG.whatsapp}`;}
+
+/* ===== início ===== */
+$("#demo").hidden=!CONFIG.demo;
+$("#chip-prazo").textContent="Pedidos até "+CONFIG.prazo;
+renderGrade();renderBarra();
+</script>
+
+</body>
+</html>
