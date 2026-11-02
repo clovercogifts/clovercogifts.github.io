@@ -1,12 +1,17 @@
 /**
- * Central de pedidos · Natal Clover
+ * Central de pedidos · Clover
  * Cole este código em Extensões > Apps Script da planilha "Pedidos Natal Clover".
  * 1) Rode a função "configurar" uma vez (ela monta as colunas e as cores).
- * 2) Implante como App da Web (Executar como: eu · Acesso: qualquer pessoa).
+ * 2) Implante como App da Web (Executar como: eu · Quem pode acessar: qualquer pessoa).
+ *
+ * NÚMERO DO PEDIDO: sai como PREFIXO-0001, PREFIXO-0002...
+ * Para a campanha de Verão, troque PREFIXO para 'ESEVERAO'.
+ * A contagem recomeça sozinha em 0001 para cada prefixo novo.
  */
 
+const PREFIXO = 'ESENATAL';
 const ABA = 'Pedidos';
-const COLUNAS = ['Data', 'Pedido', 'Status', 'Cliente', 'WhatsApp', 'Recebimento', 'Pagamento', 'Itens', 'Nomes nas peças', 'Total (R$)', 'Observações'];
+const COLUNAS = ['Data', 'Pedido', 'Status', 'Cliente', 'WhatsApp', 'Recebimento', 'Pagamento', 'Itens', 'Nomes nas peças', 'Total (R$)', 'Observações', 'ID'];
 const STATUS = ['Aguardando pagamento', 'Combinar pagamento', 'Pago', 'Em produção', 'Pronto', 'Entregue', 'Cancelado'];
 const CORES = {
   'Aguardando pagamento': '#FBE3D6',
@@ -25,10 +30,11 @@ function configurar() {
   sh.getRange(1, 1, 1, COLUNAS.length).setValues([COLUNAS])
     .setFontWeight('bold').setBackground('#3F5B16').setFontColor('#FFFFFF');
   sh.setFrozenRows(1);
-  const larguras = [130, 120, 170, 160, 130, 150, 150, 360, 220, 90, 240];
+  const larguras = [130, 130, 170, 160, 130, 150, 160, 340, 260, 90, 240, 80];
   larguras.forEach((w, i) => sh.setColumnWidth(i + 1, w));
   sh.getRange('H:I').setWrap(true);
   sh.getRange('J:J').setNumberFormat('#,##0.00');
+  sh.hideColumns(COLUNAS.length);
 
   const regraLista = SpreadsheetApp.newDataValidation().requireValueInList(STATUS, true).setAllowInvalid(false).build();
   sh.getRange(2, 3, sh.getMaxRows() - 1, 1).setDataValidation(regraLista);
@@ -38,8 +44,10 @@ function configurar() {
     .whenFormulaSatisfied('=$C2="' + s + '"').setBackground(CORES[s]).setRanges([faixa]).build());
   sh.setConditionalFormatRules(regras);
 
-  const padrao = ss.getSheetByName('Página1') || ss.getSheetByName('Sheet1');
-  if (padrao && padrao.getLastRow() === 0 && ss.getSheets().length > 1) ss.deleteSheet(padrao);
+  ['Página1', 'Sheet1'].forEach(n => {
+    const p = ss.getSheetByName(n);
+    if (p && p.getLastRow() === 0 && ss.getSheets().length > 1) ss.deleteSheet(p);
+  });
 }
 
 function doPost(e) {
@@ -49,16 +57,9 @@ function doPost(e) {
     const d = JSON.parse(e.postData.contents);
     const sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(ABA);
     const limpa = v => String(v == null ? '' : v).slice(0, 2000).replace(/^[=+\-@]/, "'$&");
-    // não duplica se o mesmo pedido chegar duas vezes
-    const ultimo = sh.getLastRow();
-    if (ultimo > 1) {
-      const codigos = sh.getRange(2, 2, ultimo - 1, 1).getValues().flat();
-      if (codigos.indexOf(d.codigo) !== -1) return resposta({ ok: true, repetido: true });
-    }
-    sh.appendRow([
-      new Date(),
-      limpa(d.codigo),
-      d.pagamento === 'outra' ? 'Combinar pagamento' : 'Aguardando pagamento',
+    const id = limpa(d.id).slice(0, 40);
+    const colId = COLUNAS.length;
+    const dados = [
       limpa(d.cliente),
       limpa(d.whatsapp),
       limpa(d.recebimento),
@@ -67,16 +68,38 @@ function doPost(e) {
       limpa(d.nomes),
       Number(d.total) || 0,
       limpa(d.obs)
-    ]);
+    ];
+
+    // mesmo pedido chegando de novo (cliente voltou e mudou os dados): atualiza a linha e mantém o número
+    const ultima = sh.getLastRow();
+    if (id && ultima > 1) {
+      const ids = sh.getRange(2, colId, ultima - 1, 1).getValues().flat();
+      const pos = ids.indexOf(id);
+      if (pos !== -1) {
+        const linha = pos + 2;
+        sh.getRange(linha, 4, 1, dados.length).setValues([dados]);
+        return resposta({ ok: true, codigo: sh.getRange(linha, 2).getValue() });
+      }
+    }
+
+    const props = PropertiesService.getScriptProperties();
+    const chave = 'seq_' + PREFIXO;
+    const n = Number(props.getProperty(chave) || 0) + 1;
+    props.setProperty(chave, String(n));
+    const codigo = PREFIXO + '-' + String(n).padStart(4, '0');
+
+    sh.appendRow([new Date(), codigo, d.pagamento === 'outra' ? 'Combinar pagamento' : 'Aguardando pagamento'].concat(dados, [id]));
     sh.getRange(sh.getLastRow(), 1).setNumberFormat('dd/MM/yyyy HH:mm');
-    return resposta({ ok: true });
+    return resposta({ ok: true, codigo: codigo });
+  } catch (err) {
+    return resposta({ ok: false, erro: String(err) });
   } finally {
     lock.releaseLock();
   }
 }
 
 function doGet() {
-  return resposta({ ok: true, central: 'Pedidos Natal Clover' });
+  return resposta({ ok: true, central: 'Pedidos Clover', prefixo: PREFIXO });
 }
 
 function resposta(obj) {

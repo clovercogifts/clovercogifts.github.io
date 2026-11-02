@@ -213,7 +213,8 @@ const CONFIG = {
   pixCidade: "CASCAVEL",            // até 15 letras
   whatsapp: "5545998621326",        // DDI + DDD + número, só dígitos (TESTE: Muri)
   whatsappExibir: "(45) 99862-1326",
-  planilha: "",                     // URL do App da Web do Google Apps Script
+  planilha: "",                     // URL do App da Web do Google Apps Script (termina em /exec)
+  prefixo: "ESENATAL",              // igual ao PREFIXO da planilha
   prazo: "23 de dezembro",
   entregas: [
     {id:"retirada", label:"Retirar no ateliê", taxa:0},
@@ -407,10 +408,7 @@ function renderPainel(){
       </div>
       <span class="erro" id="erro-dados" hidden>Preencha seu nome e WhatsApp.</span>
       ${somasHTML()}
-      <div class="grupo-btn">${cliente.pagamento==="pix"
-        ?`<button class="btn verde" type="button" id="ir-pagar">Ir para o pagamento</button>`
-        :`<a class="btn" id="finalizar" href="https://wa.me/${CONFIG.whatsapp}" target="_blank" rel="noopener">Enviar pedido no WhatsApp</a>
-          <span class="dica" style="text-align:center">O WhatsApp abre com o pedido escrito. É só tocar em enviar e combinar o pagamento na conversa.</span>`}
+      <div class="grupo-btn"><button class="btn verde" type="button" id="continuar-ped">${cliente.pagamento==="pix"?"Ir para o pagamento":"Continuar"}</button>
       <button class="btn claro" type="button" id="voltar">Voltar para a sacola</button></div>
     </form>`;
   }else if(etapa==="pagar"&&pedido){
@@ -437,9 +435,10 @@ function renderPainel(){
     <button class="btn claro" id="novo">Fazer outro pedido</button>`;
   }else if(etapa==="enviado"&&pedido){
     h+=`<div class="pix"><span class="rot">Pedido</span><span class="pedido-cod">${pedido.cod}</span><div class="preco">${brl(pedido.total)}</div>
-      <p style="margin:0;text-align:center">Agora é só tocar em enviar na conversa que abriu no WhatsApp. A gente combina o pagamento por lá.</p></div>
+      <a class="btn" style="width:100%;text-align:center;text-decoration:none" href="${zapLink()}" target="_blank" rel="noopener">Enviar pedido no WhatsApp</a>
+      <span class="dica" style="text-align:center">O WhatsApp abre com o pedido escrito. Toque em enviar e a gente combina o pagamento por lá.</span></div>
     <div class="grupo-btn">
-      <a class="btn claro" style="text-align:center;text-decoration:none" href="${zapLink()}" target="_blank" rel="noopener">Abrir o WhatsApp de novo</a>
+      <button class="btn claro" type="button" id="voltar-dados">Voltar e mudar meus dados</button>
       <button class="btn claro" id="copiar-msg">Copiar mensagem do pedido</button>
     </div>
     <p class="zap">Se o WhatsApp não abrir, mande a mensagem para <code>${esc(CONFIG.whatsappExibir)}</code>.</p>
@@ -455,9 +454,10 @@ $("#painel").addEventListener("click",ev=>{
   if(b.dataset.q&&b.dataset.k!==undefined){const i=sacola[+b.dataset.k];i.qtd=Math.max(1,Math.min(50,i.qtd+Number(b.dataset.q)));salvar();renderBarra();renderPainel();}
   else if(b.dataset.rm!==undefined){sacola.splice(+b.dataset.rm,1);salvar();renderBarra();renderPainel();if(!sacola.length)setTimeout(fechar,600);}
   else if(b.id==="ir-dados"){etapa="dados";renderPainel();}
-  else if(b.id==="ir-pagar"){lerDados();
+  else if(b.id==="continuar-ped"){lerDados();
     if(!cliente.nome.trim()||cliente.fone.replace(/\D/g,"").length<10){$("#erro-dados").hidden=false;$("#c-nome").focus();return;}
-    salvar();if(!pedido)criarPedido();enviarPlanilha();etapa="pagar";renderPainel();$("#painel").scrollTop=0;}
+    salvar();b.disabled=true;b.textContent="Gerando seu pedido…";
+    registrar().then(()=>{etapa=cliente.pagamento==="pix"?"pagar":"enviado";renderPainel();$("#painel").scrollTop=0;});}
   else if(b.id==="voltar-dados"){etapa="dados";renderPainel();}
   else if(b.id==="voltar"){lerDados();pedido=null;etapa="sacola";renderPainel();}
   else if(b.id==="copiar")copiar(pedido.pix,"Código Pix copiado","#pix-txt");
@@ -466,16 +466,6 @@ $("#painel").addEventListener("click",ev=>{
 });
 $("#painel").addEventListener("submit",ev=>ev.preventDefault());
 $("#painel").addEventListener("change",ev=>{if(ev.target.name==="pag"){lerDados();renderPainel();}});
-$("#painel").addEventListener("click",ev=>{
-  const a=ev.target.closest("#finalizar");if(!a)return;
-  lerDados();
-  if(!cliente.nome.trim()||cliente.fone.replace(/\D/g,"").length<10){ev.preventDefault();$("#erro-dados").hidden=false;$("#c-nome").focus();return;}
-  salvar();
-  if(!pedido)criarPedido();
-  a.href=zapLink();
-  enviarPlanilha();
-  setTimeout(()=>{etapa="enviado";renderPainel();},400);
-});
 function lerDados(){const f=$("#form-dados");if(!f)return;cliente.nome=$("#c-nome").value;cliente.fone=$("#c-fone").value;cliente.entrega=$("#c-ent").value;cliente.obs=$("#c-obs").value;const pg=document.querySelector("input[name=pag]:checked");cliente.pagamento=pg?pg.value:"pix";}
 
 function copiar(txt,ok,sel){
@@ -486,11 +476,31 @@ function copiar(txt,ok,sel){
 }
 
 /* ===== pedido + Pix ===== */
-function criarPedido(){
-  const d=new Date();
-  const cod="ESE-"+String(d.getDate()).padStart(2,"0")+String(d.getMonth()+1).padStart(2,"0")+"-"+Math.random().toString(36).slice(2,6).toUpperCase();
-  const tot=total();
-  pedido={cod,total:tot,pix:pixPayload(tot,cod.replace(/-/g,""))};
+function novoId(){try{return crypto.randomUUID();}catch(e){return Date.now().toString(36)+Math.random().toString(36).slice(2,10);}}
+function dadosPedido(){
+  const ent=CONFIG.entregas.find(x=>x.id===cliente.entrega);
+  return {id:pedido.id,cliente:cliente.nome.trim(),whatsapp:cliente.fone.trim(),recebimento:ent?ent.label:"",
+    pagamento:cliente.pagamento,total:pedido.total,obs:cliente.obs.trim(),
+    itens:sacola.map(i=>`${i.qtd}x ${prod(i.pid).nome}${i.op?" ("+i.op+")":""}`).join("\n"),
+    nomes:sacola.filter(i=>i.nome).map(i=>`${prod(i.pid).nome.replace(" com nome","")}: ${i.nome}${i.nome2?" "+i.nome2:""} · letra ${(LETRAS.find(l=>l.id===i.letra)||{}).label||""} · peça ${i.fundo}, nome ${i.cornome}`).join("\n")};
+}
+/* a planilha devolve o número em sequência (ESENATAL-0001...). Se ela não responder, sai um código provisório. */
+async function registrar(){
+  if(!pedido)pedido={id:novoId(),cod:null};
+  pedido.total=total();
+  let cod=null;
+  if(CONFIG.planilha){
+    for(let t=0;t<2&&!cod;t++){
+      try{
+        const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),15000);
+        const r=await fetch(CONFIG.planilha,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(dadosPedido()),signal:ctl.signal});
+        clearTimeout(tm);const j=await r.json();if(j&&j.codigo)cod=String(j.codigo);
+      }catch(e){}
+    }
+  }else if(CONFIG.demo){cod=CONFIG.prefixo+"-TESTE";}
+  if(!cod)cod=pedido.cod&&!pedido.cod.includes("-P")?pedido.cod:(CONFIG.prefixo+"-P"+Math.random().toString(36).slice(2,6).toUpperCase().replace(/[01OI]/g,"7"));
+  pedido.cod=cod;
+  pedido.pix=pixPayload(pedido.total,cod.replace(/[^A-Za-z0-9]/g,""));
 }
 function tlv(id,v){return id+String(v.length).padStart(2,"0")+v;}
 function crc16(s){let c=0xFFFF;for(let i=0;i<s.length;i++){c^=s.charCodeAt(i)<<8;for(let j=0;j<8;j++){c=(c&0x8000)?((c<<1)^0x1021):(c<<1);c&=0xFFFF;}}return c.toString(16).toUpperCase().padStart(4,"0");}
@@ -510,15 +520,6 @@ function mensagem(){
     ``,`*Pedido ${pedido.cod}*`,...linhas,``,`*Total: ${brl(pedido.total)}*`,`Recebimento: ${ent?ent.label:""}`,
     ``,`Nome: ${cliente.nome.trim()}`,`WhatsApp: ${cliente.fone.trim()}`,cliente.obs.trim()?`Obs.: ${cliente.obs.trim()}`:""
   ].filter((l,k,a)=>!(l===""&&a[k-1]==="")).join("\n").trim();
-}
-function enviarPlanilha(){
-  if(!CONFIG.planilha||!pedido||pedido.enviado)return;
-  const ent=CONFIG.entregas.find(x=>x.id===cliente.entrega);
-  const dados={codigo:pedido.cod,cliente:cliente.nome.trim(),whatsapp:cliente.fone.trim(),recebimento:ent?ent.label:"",
-    pagamento:cliente.pagamento,total:pedido.total,obs:cliente.obs.trim(),
-    itens:sacola.map(i=>`${i.qtd}x ${prod(i.pid).nome}${i.op?" ("+i.op+")":""}`).join("\n"),
-    nomes:sacola.filter(i=>i.nome).map(i=>`${prod(i.pid).nome.replace(" com nome","")}: ${i.nome}${i.nome2?" "+i.nome2:""} · letra ${(LETRAS.find(l=>l.id===i.letra)||{}).label||""} · peça ${i.fundo}, nome ${i.cornome}`).join("\n")};
-  try{fetch(CONFIG.planilha,{method:"POST",mode:"no-cors",keepalive:true,headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(dados)});pedido.enviado=true;}catch(e){}
 }
 function zapLink(){return pedido?`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(mensagem())}`:`https://wa.me/${CONFIG.whatsapp}`;}
 
