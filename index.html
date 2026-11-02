@@ -92,6 +92,9 @@ input:focus,textarea:focus,select:focus{border-color:var(--militar);outline:none
 .prev.composto .l2{display:block;font-family:var(--letra-laco);font-size:32px;margin-top:-10px}
 .prev-nota{font-size:12px;color:var(--tinta-suave);text-align:center}
 .sel-cor{display:flex;gap:6px;flex-wrap:wrap}
+.sel-cor .cor{width:28px;height:28px}
+.grupo-cor{font-size:11px;color:var(--tinta-suave);margin-top:2px}
+.aviso-cor{font-size:12px;color:var(--tinta-suave);background:var(--blush);border-radius:8px;padding:6px 10px}
 .breve{position:absolute;inset:auto 12px 12px 12px;background:rgba(255,255,255,.92);border-radius:10px;padding:6px 10px;font-size:13px;font-weight:600;text-align:center;color:var(--tinta-suave)}
 .arte.sem-foto img{opacity:.35}
 .sem-preco{font-size:16px;font-weight:700;color:var(--tinta-suave)}
@@ -223,11 +226,17 @@ const CONFIG = {
 };
 
 /* ===== CORES DE FILAMENTO (campanha) ===== */
+/* c:1 = cor da campanha (aparece primeiro) · teste:1 = cor que pede impressão de teste */
 const FIL = [
-  {n:"Rosa pastel",h:"#F7CFE0"},{n:"Verde oliva candy",h:"#8FA867"},{n:"Verde oliva",h:"#3E4A33"},{n:"Bordô silk",h:"#9E1F3F"},
-  {n:"Vermelho",h:"#D23A2A"},{n:"Laranja",h:"#F97A12"},{n:"Branco",h:"#F5F5F2"},{n:"Bege",h:"#E6D6BA"}
+  {n:"Rosa pastel",h:"#F7CFE0",c:1},{n:"Verde oliva candy",h:"#8FA867",c:1},{n:"Verde oliva",h:"#3E4A33",c:1},{n:"Bordô silk",h:"#9E1F3F",c:1},
+  {n:"Vermelho",h:"#D23A2A",c:1},{n:"Laranja",h:"#F97A12",c:1},{n:"Branco",h:"#F5F5F2",c:1},{n:"Bege",h:"#E6D6BA",c:1},{n:"Ouro envelhecido silk",h:"#C9A23A",c:1},
+  {n:"Rosa choque",h:"#F2456A"},{n:"Rosa translúcido",h:"#F6D2D8",teste:1},{n:"Amarelo",h:"#F6E27A"},{n:"Caramelo",h:"#8A5233"},{n:"Marrom",h:"#9C6B4A"},
+  {n:"Verde bandeira",h:"#3E9E5E"},{n:"Azul claro",h:"#A9DDE3"},{n:"Azul royal",h:"#1F5FA8"},{n:"Lilás",h:"#B58CE0"},{n:"Íris purple",h:"#5B2A7A"},
+  {n:"Cinza",h:"#8E8E8E"},{n:"Preto",h:"#222222"},{n:"Branco translúcido",h:"#E8EBEE",teste:1},{n:"Brilha no escuro",h:"#DDE8F0",teste:1},
+  {n:"Tricolor (vermelho, azul e dourado)",h:"linear-gradient(135deg,#C8302F 0 33%,#2E58A6 33% 66%,#C9A23A 66%)",teste:1}
 ];
-const hexFil = n => (FIL.find(f=>f.n===n)||{h:"#ccc"}).h;
+const hexFil = n => {const h=(FIL.find(f=>f.n===n)||{h:"#ccc"}).h;return h.startsWith("linear")?"#9B4FB0":h;};
+const fundoFil = n => (FIL.find(f=>f.n===n)||{h:"#ccc"}).h;
 const LETRAS = [{id:"laco",label:"Laço",dica:"cursiva"},{id:"qn",label:"Quebra-nozes",dica:"maiúsculas"},{id:"composto",label:"Composto",dica:"2 nomes"}];
 
 /* ===== PRODUTOS =====
@@ -238,12 +247,12 @@ const PRODUTOS = [
    tamanhos:[{id:"u",label:"Tamanho único",preco:null}], peca:"bola", maxLetras:9, linhas:2},
   {id:"bengala", nome:"Bengala com nome", desc:"Bengala impressa em 3D para pendurar. Um nome, até 9 letras. Nome maior vai na bola.", img:"bengala.webp", foto:true, fundo:"#FFF1F3",
    tamanhos:[{id:"u",label:"Tamanho único",preco:null}], peca:"bengala", maxLetras:9, linhas:1},
-  {id:"art-m", nome:"Quebra-nozes articulado M · trio", desc:"Três quebra-nozes com pernas articuladas, nas cores da campanha.", img:"qn-chiclete.webp", foto:false, fundo:"#FFFFFF",
-   tamanhos:[{id:"trio",label:"Trio",preco:30}], opcao:{id:"uso",rot:"Uso",vals:["Decorativo","Pingente"]}},
+  {id:"art-m", nome:"Quebra-nozes articulado M · trio", desc:"Três quebra-nozes com pernas articuladas. Você escolhe a cor de cada um.", img:"qn-chiclete.webp", foto:false, fundo:"#FFFFFF",
+   tamanhos:[{id:"trio",label:"Trio",preco:30}], opcao:{id:"uso",rot:"Uso",vals:["Decorativo","Pingente"]}, cores:3},
   {id:"art-p", nome:"Quebra-nozes articulado P · trio", desc:"A versão menor do articulado. Boa para completar o pacote de presente.", img:"qn-picole.webp", foto:false, fundo:"#FFFFFF",
-   tamanhos:[{id:"trio",label:"Trio",preco:27}], opcao:{id:"uso",rot:"Uso",vals:["Decorativo","Pingente"]}},
+   tamanhos:[{id:"trio",label:"Trio",preco:27}], opcao:{id:"uso",rot:"Uso",vals:["Decorativo","Pingente"]}, cores:3},
   {id:"ping", nome:"Pingente quebra-nozes 10 cm · trio", desc:"Três pingentes de 10 cm para pendurar na árvore.", img:"qn-praia.webp", foto:false, fundo:"#FFFFFF",
-   tamanhos:[{id:"trio",label:"Trio",preco:30}]}
+   tamanhos:[{id:"trio",label:"Trio",preco:30}], cores:3}
 ];
 
 /* ===== util ===== *//* ===== util ===== */
@@ -255,7 +264,7 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTi
 
 /* ===== estado ===== */
 const escolha = {};
-PRODUTOS.forEach(p=>escolha[p.id]={tam:p.tamanhos[0].id,op:p.opcao?p.opcao.vals[0]:"",fundo:"Rosa pastel",cornome:"Bordô silk",letra:"laco",nome:"",nome2:"",qtd:1});
+PRODUTOS.forEach(p=>escolha[p.id]={tam:p.tamanhos[0].id,op:p.opcao?p.opcao.vals[0]:"",fundo:"Rosa pastel",cornome:"Bordô silk",c1:"Rosa pastel",c2:"Verde oliva candy",c3:"Laranja",cor:"Rosa pastel",letra:"laco",nome:"",nome2:"",qtd:1});
 let sacola = [];
 let etapa = "sacola"; // sacola | dados | pagar
 let cliente = {nome:"",fone:"",entrega:"retirada",obs:"",pagamento:"pix"};
@@ -272,15 +281,19 @@ const totalQtd = () => sacola.reduce((s,i)=>s+i.qtd,0);
 
 /* ===== vitrine ===== */
 function previewHTML(p,e){
-  const st=`background:${hexFil(e.fundo)};color:${hexFil(e.cornome)}`;
+  const st=`background:${fundoFil(e.fundo)};color:${hexFil(e.cornome)}`;
   const cls=`prev ${p.peca==="bengala"?"bengala":""} ${p.peca==="bengala"?"laco":e.letra}`;
   if(p.peca==="bola"&&e.letra==="composto")
     return `<div class="${cls}" style="${st}"><span><span class="l1">${esc(e.nome||"Maria")}</span><span class="l2">${esc(e.nome2||"Eduarda")}</span></span></div>`;
   return `<div class="${cls}" style="${st}"><span class="l1">${esc(e.nome||"Seu nome")}</span></div>`;
 }
 function selCor(p,campo,rot,e){
-  return `<div class="campo"><span class="rot">${rot}: <span style="text-transform:none;letter-spacing:0">${esc(e[campo])}</span></span>
-    <div class="sel-cor">${FIL.map(f=>`<button class="cor" data-campo="${campo}" data-v="${esc(f.n)}" style="background:${f.h}" aria-label="${esc(f.n)}" aria-pressed="${f.n===e[campo]}" title="${esc(f.n)}"></button>`).join("")}</div></div>`;
+  const v=e[campo],f=FIL.find(x=>x.n===v)||{};
+  const bt=x=>`<button class="cor" data-campo="${campo}" data-v="${esc(x.n)}" style="background:${x.h}" aria-label="${esc(x.n)}" aria-pressed="${x.n===v}" title="${esc(x.n)}"></button>`;
+  return `<div class="campo"><span class="rot">${rot}: <span style="text-transform:none;letter-spacing:0">${esc(v)}</span></span>
+    <span class="grupo-cor">Cores da campanha</span><div class="sel-cor">${FIL.filter(x=>x.c).map(bt).join("")}</div>
+    <span class="grupo-cor">Outras cores</span><div class="sel-cor">${FIL.filter(x=>!x.c).map(bt).join("")}</div>
+    ${f.teste?`<span class="aviso-cor">Essa cor muda bastante com a luz. A gente confirma com você pelo WhatsApp antes de imprimir.</span>`:""}</div>`;
 }
 function cardHTML(p){
   const e=escolha[p.id];
@@ -303,6 +316,7 @@ function cardHTML(p){
       <p>${esc(p.desc)}</p>
       ${preco==null?'<div class="sem-preco">Preço em breve</div>':`<div class="preco">${brl(preco)}</div>`}
       ${p.opcao?`<div class="campo"><span class="rot">${esc(p.opcao.rot)}</span><div class="opcoes">${p.opcao.vals.map(v=>`<button class="op" data-op="${esc(v)}" aria-pressed="${v===e.op}">${esc(v)}</button>`).join("")}</div></div>`:""}
+      ${p.cores===3?selCor(p,"c1","Cor da 1ª peça",e)+selCor(p,"c2","Cor da 2ª peça",e)+selCor(p,"c3","Cor da 3ª peça",e):p.cores===1?selCor(p,"cor","Cor",e):""}
       ${nomes}
       <div class="linha-add">
         <div class="qtd"><button data-q="-1" aria-label="Diminuir">−</button><span>${e.qtd}</span><button data-q="1" aria-label="Aumentar">+</button></div>
@@ -345,6 +359,7 @@ $("#grade").addEventListener("click",ev=>{
     const erro=validar(p,e);
     if(erro){const er=card.querySelector(".erro");er.textContent=erro;er.hidden=false;return;}
     const item={pid:id,tam:e.tam,op:e.op,qtd:e.qtd};
+    if(p.cores===3)item.cores=[e.c1,e.c2,e.c3];else if(p.cores===1)item.cores=[e.cor];
     if(p.peca)Object.assign(item,{fundo:e.fundo,cornome:e.cornome,letra:p.peca==="bola"?e.letra:"laco",nome:e.nome.trim(),nome2:p.peca==="bola"&&e.letra==="composto"?e.nome2.trim():""});
     const chave=JSON.stringify({...item,qtd:0});
     const ex=sacola.find(i=>JSON.stringify({...i,qtd:0})===chave);
@@ -375,7 +390,7 @@ $("#abrir").onclick=abrir;$("#veu").onclick=fechar;
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#painel").hidden)fechar();});
 
 function passos(){const ps=[["sacola","Sacola"],["dados","Seus dados"],["pagar","Pagamento"]];return `<div class="passos">${ps.map(([k,l])=>`<span class="${k===etapa?"on":""}">${l}</span>`).join("")}</div>`;}
-function descItem(i){const p=prod(i.pid);const partes=[];if(i.op)partes.push(i.op);if(p.peca){const L=LETRAS.find(l=>l.id===i.letra);partes.push(`Nome: ${i.nome}${i.nome2?" "+i.nome2:""}`);if(p.peca==="bola"&&L)partes.push(`letra ${L.label}`);partes.push(`peça ${i.fundo}, nome ${i.cornome}`);}return partes.join(" · ");}
+function descItem(i){const p=prod(i.pid);const partes=[];if(i.op)partes.push(i.op);if(i.cores)partes.push((i.cores.length>1?"cores: ":"cor: ")+i.cores.join(", "));if(p.peca){const L=LETRAS.find(l=>l.id===i.letra);partes.push(`Nome: ${i.nome}${i.nome2?" "+i.nome2:""}`);if(p.peca==="bola"&&L)partes.push(`letra ${L.label}`);partes.push(`peça ${i.fundo}, nome ${i.cornome}`);}return partes.join(" · ");}
 function somasHTML(){
   const ent=CONFIG.entregas.find(x=>x.id===cliente.entrega);
   return `<div class="somas"><div><span>Produtos</span><span>${brl(subtotal())}</span></div>
@@ -482,7 +497,7 @@ function dadosPedido(){
   const ent=CONFIG.entregas.find(x=>x.id===cliente.entrega);
   return {id:pedido.id,cliente:cliente.nome.trim(),whatsapp:cliente.fone.trim(),recebimento:ent?ent.label:"",
     pagamento:cliente.pagamento,total:pedido.total,obs:cliente.obs.trim(),
-    itens:sacola.map(i=>`${i.qtd}x ${prod(i.pid).nome}${i.op?" ("+i.op+")":""}`).join("\n"),
+    itens:sacola.map(i=>{const p=prod(i.pid);return `${i.qtd}x ${p.nome}`+(p.peca?"":(descItem(i)?" · "+descItem(i):""));}).join("\n"),
     nomes:sacola.filter(i=>i.nome).map(i=>`${prod(i.pid).nome.replace(" com nome","")}: ${i.nome}${i.nome2?" "+i.nome2:""} · letra ${(LETRAS.find(l=>l.id===i.letra)||{}).label||""} · peça ${i.fundo}, nome ${i.cornome}`).join("\n")};
 }
 /* a planilha devolve o número em sequência (ESENATAL-0001...). Se ela não responder, sai um código provisório. */
