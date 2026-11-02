@@ -368,7 +368,7 @@ function renderBarra(){
 }
 
 /* ===== painel ===== */
-function abrir(){etapa=pedido?"pagar":"sacola";$("#veu").hidden=false;$("#painel").hidden=false;renderPainel();$("#painel .fechar")?.focus();}
+function abrir(){etapa=pedido?(cliente.pagamento==="pix"?"pagar":"enviado"):"sacola";$("#veu").hidden=false;$("#painel").hidden=false;renderPainel();$("#painel .fechar")?.focus();}
 function fechar(){$("#veu").hidden=true;$("#painel").hidden=true;}
 $("#abrir").onclick=abrir;$("#veu").onclick=fechar;
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("#painel").hidden)fechar();});
@@ -407,30 +407,39 @@ function renderPainel(){
       </div>
       <span class="erro" id="erro-dados" hidden>Preencha seu nome e WhatsApp.</span>
       ${somasHTML()}
-      <div class="grupo-btn"><a class="btn" id="finalizar" href="https://wa.me/${CONFIG.whatsapp}" target="_blank" rel="noopener">Finalizar pedido no WhatsApp</a>
-      <span class="dica" style="text-align:center">O WhatsApp abre com o resumo pronto. É só tocar em enviar.</span>
+      <div class="grupo-btn">${cliente.pagamento==="pix"
+        ?`<button class="btn verde" type="button" id="ir-pagar">Ir para o pagamento</button>`
+        :`<a class="btn" id="finalizar" href="https://wa.me/${CONFIG.whatsapp}" target="_blank" rel="noopener">Enviar pedido no WhatsApp</a>
+          <span class="dica" style="text-align:center">O WhatsApp abre com o pedido escrito. É só tocar em enviar e combinar o pagamento na conversa.</span>`}
       <button class="btn claro" type="button" id="voltar">Voltar para a sacola</button></div>
     </form>`;
   }else if(etapa==="pagar"&&pedido){
-    const pix=cliente.pagamento==="pix";
-    h+=`<div class="aviso"><strong>Confirme que tocou em enviar no WhatsApp.</strong> Seu pedido só chega até nós quando a mensagem é enviada.</div>`;
-    if(pix){
     h+=`<div class="pix">
       <span class="rot">Pedido</span><span class="pedido-cod">${pedido.cod}</span>
       <div class="preco">${brl(pedido.total)}</div>
       ${CONFIG.demo?`<div class="aviso"><strong>Pix de demonstração.</strong> Não pague: a chave ainda não é a real.</div>`:""}
+      <span class="rot">1 · Pague com Pix</span>
       <div id="qr" aria-label="QR Code do Pix"></div>
-      <span class="rot">Pix copia e cola</span>
       <div class="codigo" id="pix-txt">${esc(pedido.pix)}</div>
       <button class="btn verde" id="copiar">Copiar código Pix</button>
+      <span class="dica" style="text-align:center">No app do banco, escolha Pix copia e cola. O valor já vem preenchido.</span>
     </div>
-    <div class="aviso">Depois de pagar, mande o comprovante na mesma conversa. A produção começa quando confirmarmos o pagamento e a grafia dos nomes.</div>`;
-    }else{
+    <div class="pix">
+      <span class="rot">2 · Envie o pedido e o comprovante</span>
+      <a class="btn" style="width:100%;text-align:center;text-decoration:none" href="${zapLink()}" target="_blank" rel="noopener">Já paguei · enviar no WhatsApp</a>
+      <span class="dica" style="text-align:center">O WhatsApp abre com o pedido escrito. Anexe o comprovante na mesma conversa e toque em enviar.</span>
+    </div>
+    <div class="grupo-btn">
+      <button class="btn claro" id="copiar-msg">Copiar mensagem do pedido</button>
+      <button class="btn claro" type="button" id="voltar-dados">Voltar e mudar meus dados</button>
+    </div>
+    <p class="zap">Se o WhatsApp não abrir, mande a mensagem para <code>${esc(CONFIG.whatsappExibir)}</code>.</p>
+    <button class="btn claro" id="novo">Fazer outro pedido</button>`;
+  }else if(etapa==="enviado"&&pedido){
     h+=`<div class="pix"><span class="rot">Pedido</span><span class="pedido-cod">${pedido.cod}</span><div class="preco">${brl(pedido.total)}</div>
-      <p style="margin:0;text-align:center">Vamos combinar o pagamento pelo WhatsApp.</p></div>`;
-    }
-    h+=`<div class="grupo-btn">
-      <a class="btn claro" href="${zapLink()}" target="_blank" rel="noopener">Abrir o WhatsApp de novo</a>
+      <p style="margin:0;text-align:center">Agora é só tocar em enviar na conversa que abriu no WhatsApp. A gente combina o pagamento por lá.</p></div>
+    <div class="grupo-btn">
+      <a class="btn claro" style="text-align:center;text-decoration:none" href="${zapLink()}" target="_blank" rel="noopener">Abrir o WhatsApp de novo</a>
       <button class="btn claro" id="copiar-msg">Copiar mensagem do pedido</button>
     </div>
     <p class="zap">Se o WhatsApp não abrir, mande a mensagem para <code>${esc(CONFIG.whatsappExibir)}</code>.</p>
@@ -446,12 +455,17 @@ $("#painel").addEventListener("click",ev=>{
   if(b.dataset.q&&b.dataset.k!==undefined){const i=sacola[+b.dataset.k];i.qtd=Math.max(1,Math.min(50,i.qtd+Number(b.dataset.q)));salvar();renderBarra();renderPainel();}
   else if(b.dataset.rm!==undefined){sacola.splice(+b.dataset.rm,1);salvar();renderBarra();renderPainel();if(!sacola.length)setTimeout(fechar,600);}
   else if(b.id==="ir-dados"){etapa="dados";renderPainel();}
+  else if(b.id==="ir-pagar"){lerDados();
+    if(!cliente.nome.trim()||cliente.fone.replace(/\D/g,"").length<10){$("#erro-dados").hidden=false;$("#c-nome").focus();return;}
+    salvar();if(!pedido)criarPedido();enviarPlanilha();etapa="pagar";renderPainel();$("#painel").scrollTop=0;}
+  else if(b.id==="voltar-dados"){etapa="dados";renderPainel();}
   else if(b.id==="voltar"){lerDados();pedido=null;etapa="sacola";renderPainel();}
   else if(b.id==="copiar")copiar(pedido.pix,"Código Pix copiado","#pix-txt");
   else if(b.id==="copiar-msg")copiar(mensagem(),"Mensagem copiada");
   else if(b.id==="novo"){pedido=null;sacola=[];salvar();renderBarra();fechar();toast("Sacola limpa");}
 });
 $("#painel").addEventListener("submit",ev=>ev.preventDefault());
+$("#painel").addEventListener("change",ev=>{if(ev.target.name==="pag"){lerDados();renderPainel();}});
 $("#painel").addEventListener("click",ev=>{
   const a=ev.target.closest("#finalizar");if(!a)return;
   lerDados();
@@ -460,7 +474,7 @@ $("#painel").addEventListener("click",ev=>{
   if(!pedido)criarPedido();
   a.href=zapLink();
   enviarPlanilha();
-  setTimeout(()=>{etapa="pagar";renderPainel();},400);
+  setTimeout(()=>{etapa="enviado";renderPainel();},400);
 });
 function lerDados(){const f=$("#form-dados");if(!f)return;cliente.nome=$("#c-nome").value;cliente.fone=$("#c-fone").value;cliente.entrega=$("#c-ent").value;cliente.obs=$("#c-obs").value;const pg=document.querySelector("input[name=pag]:checked");cliente.pagamento=pg?pg.value:"pix";}
 
@@ -486,10 +500,16 @@ function pixPayload(valor,txid){
   let p=tlv("00","01")+tlv("26",tlv("00","br.gov.bcb.pix")+tlv("01",CONFIG.pixChave.trim()))+tlv("52","0000")+tlv("53","986")+tlv("54",valor.toFixed(2))+tlv("58","BR")+tlv("59",nome)+tlv("60",cidade)+tlv("62",tlv("05",txid.slice(0,25)))+"6304";
   return p+crc16(p);
 }
-function mensagem(){const outra=cliente.pagamento==="outra";
+function mensagem(){
+  const outra=cliente.pagamento==="outra";
   const ent=CONFIG.entregas.find(x=>x.id===cliente.entrega);
-  const linhas=sacola.map(i=>`• ${i.qtd}x ${prod(i.pid).nome} (${descItem(i)}) = ${brl(precoItem(i)*i.qtd)}`);
-  return [`Olá! Quero fazer meu pedido da coleção *E se…?*`,``,`*Pedido ${pedido.cod}*`,...linhas,``,`*Total: ${brl(pedido.total)}*`,`Entrega: ${ent?ent.label:""}`,``,`Nome: ${cliente.nome}`,`WhatsApp: ${cliente.fone}`,cliente.obs?`Obs.: ${cliente.obs}`:"",``,outra?`Pagamento: quero combinar outra forma.`:`Pagamento: Pix. Vou pagar agora e envio o comprovante aqui.`].filter((l,k,a)=>!(l===""&&a[k-1]==="")).join("\n");
+  const linhas=sacola.map(i=>{const d=descItem(i);return `• ${i.qtd}x ${prod(i.pid).nome}${d?"\n   "+d:""}\n   ${brl(precoItem(i)*i.qtd)}`;});
+  return [
+    outra?`Oi, Clover! Fiz meu pedido do Natal *E se…?* e quero combinar a forma de pagamento.`
+         :`Oi, Clover! Fiz meu pedido do Natal *E se…?* e já paguei pelo Pix. O comprovante vai junto.`,
+    ``,`*Pedido ${pedido.cod}*`,...linhas,``,`*Total: ${brl(pedido.total)}*`,`Recebimento: ${ent?ent.label:""}`,
+    ``,`Nome: ${cliente.nome.trim()}`,`WhatsApp: ${cliente.fone.trim()}`,cliente.obs.trim()?`Obs.: ${cliente.obs.trim()}`:""
+  ].filter((l,k,a)=>!(l===""&&a[k-1]==="")).join("\n").trim();
 }
 function enviarPlanilha(){
   if(!CONFIG.planilha||!pedido||pedido.enviado)return;
