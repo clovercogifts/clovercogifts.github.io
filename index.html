@@ -489,7 +489,8 @@ async function registrar(){
   if(!pedido)pedido={id:novoId(),cod:null};
   pedido.total=total();
   let cod=null;
-  if(CONFIG.planilha){
+  const noSite=/github\.io$/.test(location.hostname);
+  if(CONFIG.planilha&&noSite){
     for(let t=0;t<2&&!cod;t++){
       try{
         const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),15000);
@@ -497,7 +498,7 @@ async function registrar(){
         clearTimeout(tm);const j=await r.json();if(j&&j.codigo)cod=String(j.codigo);
       }catch(e){}
     }
-  }else if(CONFIG.demo){cod=CONFIG.prefixo+"-TESTE";}
+  }else if(!noSite||CONFIG.demo&&!CONFIG.planilha){cod=CONFIG.prefixo+"-TESTE";}
   if(!cod)cod=pedido.cod&&!pedido.cod.includes("-P")?pedido.cod:(CONFIG.prefixo+"-P"+Math.random().toString(36).slice(2,6).toUpperCase().replace(/[01OI]/g,"7"));
   pedido.cod=cod;
   pedido.pix=pixPayload(pedido.total,cod.replace(/[^A-Za-z0-9]/g,""));
