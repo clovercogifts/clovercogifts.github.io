@@ -33,7 +33,7 @@ button{cursor:pointer}
 .demo .wrap{padding-block:8px}
 
 .topo{position:relative;overflow:hidden;background:var(--papel)}
-.topo::before{content:"";position:absolute;inset:0;background:url("assets/estrelas.webp") 0 0/240px 240px;opacity:.35}
+.topo::before{content:"";position:absolute;inset:0;background:url("assets/estrelas-fundo.webp") center/cover no-repeat;opacity:.32}
 .topo .wrap{position:relative;padding-block:28px 12px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px;align-items:end}
 .topo-txt{display:grid;gap:12px;padding-bottom:28px}
 .marca{font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--militar)}
@@ -93,15 +93,22 @@ input:focus,textarea:focus,select:focus{border-color:var(--militar);outline:none
 .prev-nota{font-size:12px;color:var(--tinta-suave);text-align:center}
 .sel-cor{display:flex;gap:6px;flex-wrap:wrap}
 .sel-cor .cor{width:28px;height:28px}
+.mais-cores{align-self:flex-start;border:0;background:none;padding:2px 0;font-weight:700;font-size:13px;color:var(--militar);text-decoration:underline;text-underline-offset:3px}
 .grupo-cor{font-size:11px;color:var(--tinta-suave);margin-top:2px}
 .aviso-cor{font-size:12px;color:var(--tinta-suave);background:var(--blush);border-radius:8px;padding:6px 10px}
 .breve{position:absolute;inset:auto 12px 12px 12px;background:rgba(255,255,255,.92);border-radius:10px;padding:6px 10px;font-size:13px;font-weight:600;text-align:center;color:var(--tinta-suave)}
 .arte.sem-foto img{opacity:.35}
 .sem-preco{font-size:16px;font-weight:700;color:var(--tinta-suave)}
-.rodape{padding-block:10px 30px}
-.rodape .wrap{display:flex;align-items:center;gap:18px;flex-wrap:wrap;justify-content:center;text-align:center}
-.rodape img{width:120px;height:auto}
-.rodape p{margin:0;font-family:var(--display);font-weight:400;font-size:20px;color:var(--militar);max-width:28ch}
+.rodape{padding-block:20px 36px;border-top:1px dashed var(--linha)}
+.rodape .wrap{display:grid;gap:18px;justify-items:center;text-align:center}
+.boia{width:min(260px,70%);height:auto}
+.rodape p{margin:0;font-family:var(--display);font-weight:400;font-size:clamp(22px,4vw,30px);color:var(--vinho);max-width:22ch;line-height:1.2}
+.elenco{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-end;gap:14px 20px;max-width:900px}
+.elenco img{height:84px;width:auto;max-width:110px;object-fit:contain}
+.elenco img:nth-child(odd){transform:rotate(-4deg)}
+.elenco img:nth-child(3n){transform:rotate(5deg)}
+.assina-rodape{font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;color:var(--militar)}
+@media (max-width:640px){.elenco img{height:60px;max-width:80px}}
 .dica{font-size:13px;color:var(--tinta-suave)}
 .linha-add{display:flex;gap:10px;align-items:center;margin-top:auto}
 .qtd{display:flex;align-items:center;border:2px solid var(--linha);border-radius:10px;overflow:hidden}
@@ -191,7 +198,12 @@ input:focus,textarea:focus,select:focus{border-color:var(--militar);outline:none
   </div>
 </main>
 
-<section class="rodape"><div class="wrap"><img src="assets/qn-praia.webp" width="520" height="825" alt="" loading="lazy"><p>E se o Natal saísse do roteiro?</p><img src="assets/laco-laranja.webp" width="220" height="265" alt="" loading="lazy" style="width:70px"></div></section>
+<section class="rodape"><div class="wrap">
+  <img class="boia" src="assets/qn-boia.webp" width="520" height="564" alt="Quebra-nozes de óculos escuros na boia" loading="lazy">
+  <p>E se o Natal fosse na piscina?</p>
+  <div class="elenco"><img src="assets/rena-rosa.webp" alt="Rena de balão rosa" loading="lazy"><img src="assets/pinheiro.webp" alt="Pinheiro com laços" loading="lazy"><img src="assets/bengala.webp" alt="Bengala" loading="lazy"><img src="assets/presentes.webp" alt="Pilha de presentes" loading="lazy"><img src="assets/bola-joy.webp" alt="Bola de Natal" loading="lazy"><img src="assets/arvore-rosa.webp" alt="Árvore rosa" loading="lazy"><img src="assets/laco-rosa.webp" alt="Laço" loading="lazy"><img src="assets/rena-laranja.webp" alt="Rena de balão laranja" loading="lazy"><img src="assets/qn-chiclete.webp" alt="Quebra-nozes" loading="lazy"></div>
+  <span class="assina-rodape">Clover · Natal 2026</span>
+</div></section>
 
 <div class="barra" id="barra">
   <div class="wrap">
@@ -289,10 +301,12 @@ function previewHTML(p,e){
 }
 function selCor(p,campo,rot,e){
   const v=e[campo],f=FIL.find(x=>x.n===v)||{};
+  const aberto=!!(e.mais&&e.mais[campo])||!f.c;
   const bt=x=>`<button class="cor" data-campo="${campo}" data-v="${esc(x.n)}" style="background:${x.h}" aria-label="${esc(x.n)}" aria-pressed="${x.n===v}" title="${esc(x.n)}"></button>`;
   return `<div class="campo"><span class="rot">${rot}: <span style="text-transform:none;letter-spacing:0">${esc(v)}</span></span>
-    <span class="grupo-cor">Cores da campanha</span><div class="sel-cor">${FIL.filter(x=>x.c).map(bt).join("")}</div>
-    <span class="grupo-cor">Outras cores</span><div class="sel-cor">${FIL.filter(x=>!x.c).map(bt).join("")}</div>
+    <div class="sel-cor">${FIL.filter(x=>x.c).map(bt).join("")}</div>
+    ${aberto?`<span class="grupo-cor">Outras cores</span><div class="sel-cor">${FIL.filter(x=>!x.c).map(bt).join("")}</div>`
+            :`<button class="mais-cores" data-mais="${campo}">+ ver mais ${FIL.filter(x=>!x.c).length} cores</button>`}
     ${f.teste?`<span class="aviso-cor">Essa cor muda bastante com a luz. A gente confirma com você pelo WhatsApp antes de imprimir.</span>`:""}</div>`;
 }
 function cardHTML(p){
@@ -352,6 +366,7 @@ $("#grade").addEventListener("click",ev=>{
   if(b.dataset.tam){e.tam=b.dataset.tam;rerenderCard(id);}
   else if(b.dataset.op){e.op=b.dataset.op;rerenderCard(id);}
   else if(b.dataset.letra){e.letra=b.dataset.letra;rerenderCard(id);}
+  else if(b.dataset.mais){e.mais=e.mais||{};e.mais[b.dataset.mais]=true;rerenderCard(id);}
   else if(b.dataset.campo){e[b.dataset.campo]=b.dataset.v;rerenderCard(id);}
   else if(b.dataset.q){e.qtd=Math.max(1,Math.min(50,e.qtd+Number(b.dataset.q)));rerenderCard(id);}
   else if(b.classList.contains("add")){
