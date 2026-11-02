@@ -486,6 +486,18 @@ function dadosPedido(){
     nomes:sacola.filter(i=>i.nome).map(i=>`${prod(i.pid).nome.replace(" com nome","")}: ${i.nome}${i.nome2?" "+i.nome2:""} · letra ${(LETRAS.find(l=>l.id===i.letra)||{}).label||""} · peça ${i.fundo}, nome ${i.cornome}`).join("\n")};
 }
 /* a planilha devolve o número em sequência (ESENATAL-0001...). Se ela não responder, sai um código provisório. */
+function jsonp(url,dados,espera){
+  return new Promise((ok,falha)=>{
+    const cb="clv"+Date.now()+Math.floor(Math.random()*1e4);
+    const sc=document.createElement("script");
+    const fim=()=>{clearTimeout(t);try{delete window[cb];}catch(e){}sc.remove();};
+    const t=setTimeout(()=>{fim();falha(new Error("a planilha demorou mais de 15 s"));},espera);
+    window[cb]=r=>{fim();ok(r);};
+    sc.onerror=()=>{fim();falha(new Error("a planilha recusou o pedido (confira se a versão nova foi implantada)"));};
+    sc.src=url+"?callback="+cb+"&d="+encodeURIComponent(JSON.stringify(dados));
+    document.head.appendChild(sc);
+  });
+}
 async function registrar(){
   if(!pedido)pedido={id:novoId(),cod:null};
   pedido.total=total();
@@ -494,11 +506,9 @@ async function registrar(){
   if(CONFIG.planilha&&noSite){
     for(let t=0;t<2&&!cod;t++){
       try{
-        const ctl=new AbortController();const tm=setTimeout(()=>ctl.abort(),15000);
-        const r=await fetch(CONFIG.planilha,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(dadosPedido()),signal:ctl.signal});
-        clearTimeout(tm);const txt=await r.text();let j=null;try{j=JSON.parse(txt);}catch(e){pedido.erro="resposta inesperada: "+txt.slice(0,120);}
-        if(j&&j.codigo)cod=String(j.codigo);else if(j)pedido.erro=j.erro||"sem número na resposta";
-      }catch(e){pedido.erro=(e&&e.name==="AbortError")?"a planilha demorou mais de 15 s":"falha de conexão ("+(e&&e.message||e)+")";}
+        const j=await jsonp(CONFIG.planilha,dadosPedido(),15000);
+        if(j&&j.codigo)cod=String(j.codigo);else pedido.erro=(j&&j.erro)||"sem número na resposta";
+      }catch(e){pedido.erro=e.message;}
     }
   }else if(!noSite||CONFIG.demo&&!CONFIG.planilha){cod=CONFIG.prefixo+"-TESTE";}
   if(!cod)cod=pedido.cod&&!pedido.cod.includes("-P")?pedido.cod:(CONFIG.prefixo+"-P"+Math.random().toString(36).slice(2,6).toUpperCase().replace(/[01OI]/g,"7"));

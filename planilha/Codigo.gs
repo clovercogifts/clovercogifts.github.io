@@ -50,13 +50,38 @@ function configurar() {
   });
 }
 
+/* A loja envia o pedido por um link (GET) e recebe a resposta como script.
+   Esse formato não é bloqueado pelos navegadores de celular. */
+function doGet(e) {
+  const p = (e && e.parameter) || {};
+  const cb = /^[A-Za-z0-9_]{1,40}$/.test(p.callback || '') ? p.callback : null;
+  let out;
+  if (p.d) {
+    try { out = gravar(JSON.parse(p.d)); }
+    catch (err) { out = { ok: false, erro: String(err) }; }
+  } else {
+    out = { ok: true, central: 'Pedidos Clover', prefixo: PREFIXO };
+  }
+  if (cb) {
+    return ContentService.createTextOutput(cb + '(' + JSON.stringify(out) + ');')
+      .setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);
+}
+
 function doPost(e) {
+  let out;
+  try { out = gravar(JSON.parse(e.postData.contents)); }
+  catch (err) { out = { ok: false, erro: String(err) }; }
+  return ContentService.createTextOutput(JSON.stringify(out)).setMimeType(ContentService.MimeType.JSON);
+}
+
+function gravar(d) {
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
-    const d = JSON.parse(e.postData.contents);
     const ss = SpreadsheetApp.getActiveSpreadsheet();
-    if (!ss) return resposta({ ok: false, erro: 'o código não está dentro da planilha (abra pela planilha em Extensões > Apps Script)' });
+    if (!ss) return { ok: false, erro: 'o código não está dentro da planilha (abra pela planilha em Extensões > Apps Script)' };
     let sh = ss.getSheetByName(ABA);
     if (!sh) { configurar(); sh = ss.getSheetByName(ABA); }
     const limpa = v => String(v == null ? '' : v).slice(0, 2000).replace(/^[=+\-@]/, "'$&");
@@ -81,7 +106,7 @@ function doPost(e) {
       if (pos !== -1) {
         const linha = pos + 2;
         sh.getRange(linha, 4, 1, dados.length).setValues([dados]);
-        return resposta({ ok: true, codigo: sh.getRange(linha, 2).getValue() });
+        return { ok: true, codigo: sh.getRange(linha, 2).getValue() };
       }
     }
 
@@ -93,18 +118,15 @@ function doPost(e) {
 
     sh.appendRow([new Date(), codigo, d.pagamento === 'outra' ? 'Combinar pagamento' : 'Aguardando pagamento'].concat(dados, [id]));
     sh.getRange(sh.getLastRow(), 1).setNumberFormat('dd/MM/yyyy HH:mm');
-    return resposta({ ok: true, codigo: codigo });
-  } catch (err) {
-    return resposta({ ok: false, erro: String(err) });
+    return { ok: true, codigo: codigo };
   } finally {
     lock.releaseLock();
   }
 }
 
-function doGet() {
-  return resposta({ ok: true, central: 'Pedidos Clover', prefixo: PREFIXO });
-}
-
-function resposta(obj) {
-  return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
+/* Teste pelo próprio Apps Script: escolha "testar" e clique em Executar.
+   Ele grava uma linha de teste e mostra o número no Registro de execução. */
+function testar() {
+  const r = gravar({ id: 'teste-' + Date.now(), cliente: 'Teste', whatsapp: '-', recebimento: '-', pagamento: 'pix', itens: 'Linha de teste: pode apagar', nomes: '', total: 0, obs: '' });
+  Logger.log(JSON.stringify(r));
 }
