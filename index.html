@@ -14,7 +14,7 @@
 /* Layout: faixa de campanha no topo, vitrine em grade, barra de sacola fixa embaixo, pedido em painel deslizante. Visual único (claro) por escolha: é a paleta da campanha. */
 :root{
   --blush:#F7C6CC; --oliva:#C3CC4E; --militar:#3F5B16; --laranja:#FF6B1A; --vinho:#790808;
-  --papel:#FFFFFF; --rosa-capa:#FAD7DE; --cartao:#FFFFFF; --tinta:#263510; --tinta-suave:#5B6A45; --linha:#EDDCDC;
+  --papel:#FFFFFF; --rosa-capa:#FAD7DE; --bege:#FCF5E6; --cartao:#FFFFFF; --tinta:#263510; --tinta-suave:#5B6A45; --linha:#EDDCDC;
   --display:"Borne Celine","Josefin Sans",Georgia,serif;
   --texto:"Josefin Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   /* prévias das letras das peças: aproximações das fontes de produção */
@@ -23,7 +23,7 @@
   color-scheme:light;
 }
 *{box-sizing:border-box}
-body{background:var(--papel);color:var(--tinta);font-family:var(--texto);font-size:16px;line-height:1.5;padding-bottom:96px}
+body{background:var(--rosa-capa);color:var(--tinta);font-family:var(--texto);font-size:16px;line-height:1.5;padding-bottom:96px}
 button,input,select,textarea{font:inherit;color:inherit}
 button{cursor:pointer}
 :focus-visible{outline:3px solid var(--laranja);outline-offset:2px}
@@ -32,8 +32,7 @@ button{cursor:pointer}
 .demo{background:var(--militar);color:#fff;font-size:13px;font-weight:600}
 .demo .wrap{padding-block:8px}
 
-.topo{position:relative;overflow:hidden;background:var(--rosa-capa) url("assets/estrelas-capa.webp") center/cover no-repeat}
-.topo::before{content:"";position:absolute;inset:0;background:rgba(250,215,222,.62)}
+.topo{position:relative;overflow:hidden;background:var(--rosa-capa)}
 .topo .chip{background:#FFFFFF}
 .topo .wrap{position:relative;padding-block:28px 12px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:16px;align-items:end}
 .topo-txt{display:grid;gap:12px;padding-bottom:28px}
@@ -63,7 +62,7 @@ button{cursor:pointer}
 .vitrine .sub{margin:0 0 24px;color:var(--tinta-suave);max-width:60ch}
 .grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px}
 
-.prod{background:var(--cartao);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;border:1px solid var(--linha)}
+.prod{background:var(--cartao);border-radius:18px;overflow:hidden;display:flex;flex-direction:column;border:0;box-shadow:0 1px 0 rgba(121,8,8,.08)}
 .arte{aspect-ratio:4/3;max-width:100%;width:100%;position:relative;overflow:hidden;background:var(--fundo,#fff);flex:0 0 auto}
 .arte img{position:absolute;top:14px;left:14px;width:calc(100% - 28px);height:calc(100% - 28px);max-width:none;object-fit:contain;display:block}
 .arte .ex{z-index:1}
@@ -100,7 +99,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--militar);outline:none
 .breve{position:absolute;inset:auto 12px 12px 12px;background:rgba(255,255,255,.92);border-radius:10px;padding:6px 10px;font-size:13px;font-weight:600;text-align:center;color:var(--tinta-suave)}
 .arte.sem-foto img{opacity:.35}
 .sem-preco{font-size:16px;font-weight:700;color:var(--tinta-suave)}
-.rodape{padding-block:20px 36px;border-top:1px dashed var(--linha)}
+.rodape{padding-block:20px 36px}
 .rodape .wrap{display:grid;gap:18px;justify-items:center;text-align:center}
 .boia{width:min(260px,70%);height:auto}
 .rodape p{margin:0;font-family:var(--display);font-weight:400;font-size:clamp(22px,4vw,30px);color:var(--vinho);max-width:22ch;line-height:1.2}
@@ -256,15 +255,15 @@ const LETRAS = [{id:"laco",label:"Laço",dica:"cursiva"},{id:"qn",label:"Quebra-
    preco:null = preço ainda não definido (aparece, mas não entra na sacola)
    foto:false = sem foto do produto real ainda */
 const PRODUTOS = [
-  {id:"bola", nome:"Bola com nome", desc:"Bola plana impressa em 3D. Até 2 linhas, cerca de 9 letras por linha.", img:"bolas.webp", foto:true, fundo:"#FBF6EE",
+  {id:"bola", nome:"Bola com nome", desc:"Bola plana impressa em 3D. Até 2 linhas, cerca de 9 letras por linha.", img:"bolas.webp", foto:true, fundo:"var(--bege)",
    tamanhos:[{id:"u",label:"Tamanho único",preco:null}], peca:"bola", maxLetras:9, linhas:2},
-  {id:"bengala", nome:"Bengala com nome", desc:"Bengala impressa em 3D para pendurar. Um nome, até 9 letras. Nome maior vai na bola.", img:"bengala.webp", foto:true, fundo:"#FFF1F3",
+  {id:"bengala", nome:"Bengala com nome", desc:"Bengala impressa em 3D para pendurar. Um nome, até 9 letras. Nome maior vai na bola.", img:"bengala.webp", foto:true, fundo:"var(--bege)",
    tamanhos:[{id:"u",label:"Tamanho único",preco:null}], peca:"bengala", maxLetras:9, linhas:1},
-  {id:"art-m", nome:"Quebra-nozes articulado M · trio", desc:"Três quebra-nozes com pernas articuladas. Você escolhe a cor de cada um.", img:"qn-chiclete.webp", foto:false, fundo:"#FFFFFF",
+  {id:"art-m", nome:"Quebra-nozes articulado M · trio", desc:"Três quebra-nozes com pernas articuladas. Você escolhe a cor de cada um.", img:"qn-chiclete.webp", foto:false, fundo:"var(--bege)",
    tamanhos:[{id:"trio",label:"Trio",preco:30}], opcao:{id:"uso",rot:"Uso",vals:["Decorativo","Pingente"]}, cores:3},
-  {id:"art-p", nome:"Quebra-nozes articulado P · trio", desc:"A versão menor do articulado. Boa para completar o pacote de presente.", img:"qn-picole.webp", foto:false, fundo:"#FFFFFF",
+  {id:"art-p", nome:"Quebra-nozes articulado P · trio", desc:"A versão menor do articulado. Boa para completar o pacote de presente.", img:"qn-picole.webp", foto:false, fundo:"var(--bege)",
    tamanhos:[{id:"trio",label:"Trio",preco:27}], opcao:{id:"uso",rot:"Uso",vals:["Decorativo","Pingente"]}, cores:3},
-  {id:"ping", nome:"Pingente quebra-nozes 10 cm · trio", desc:"Três pingentes de 10 cm para pendurar na árvore.", img:"qn-praia.webp", foto:false, fundo:"#FFFFFF",
+  {id:"ping", nome:"Pingente quebra-nozes 10 cm · trio", desc:"Três pingentes de 10 cm para pendurar na árvore.", img:"qn-praia.webp", foto:false, fundo:"var(--bege)",
    tamanhos:[{id:"trio",label:"Trio",preco:30}], cores:3}
 ];
 
