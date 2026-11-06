@@ -98,7 +98,7 @@ input:focus,textarea:focus,select:focus{border-color:var(--militar);outline:none
 .aviso-cor{font-size:12px;color:var(--tinta-suave);background:var(--blush);border-radius:8px;padding:6px 10px}
 .breve{position:absolute;inset:auto 12px 12px 12px;background:rgba(255,255,255,.92);border-radius:10px;padding:6px 10px;font-size:13px;font-weight:600;text-align:center;color:var(--tinta-suave)}
 .arte.sem-foto img{opacity:.35}
-.arte.com-foto{aspect-ratio:4/5}
+.arte.com-foto{aspect-ratio:1/1}
 .arte.com-foto img{top:0;left:0;width:100%;height:100%;object-fit:cover}
 .sem-preco{font-size:16px;font-weight:700;color:var(--tinta-suave)}
 .rodape{padding-block:20px 36px}
@@ -260,15 +260,15 @@ const PRODUTOS = [
    tamanhos:[{id:"u",label:"Tamanho único",preco:null}], peca:"bola", maxLetras:9, linhas:2},
   {id:"bengala", nome:"Bengala com nome", desc:"Bengala impressa em 3D para pendurar. Um nome, até 9 letras. Nome maior vai na bola.", img:"bengala.webp", foto:false, fundo:"var(--bege)",
    tamanhos:[{id:"u",label:"Tamanho único",preco:null}], peca:"bengala", maxLetras:9, linhas:1},
-  {id:"art-m", nome:"Quebra-nozes articulado M · trio", desc:"Três quebra-nozes com pernas que balançam. Na foto, o decorativo (rosa) e o pingente com argola (verde). Você escolhe a cor de cada um.", img:"foto-articulados.webp", foto:true, fundo:"var(--bege)",
+  {id:"art-m", nome:"Quebra-nozes articulado M · trio", desc:"Três quebra-nozes com pernas que balançam. Na foto, o trio nas cores da campanha. Você escolhe a cor de cada um.", img:"foto-trio-m.webp", foto:true, fundo:"var(--bege)",
    tamanhos:[{id:"trio",label:"Trio",preco:30}], opcao:{id:"uso",rot:"Uso",vals:["Decorativo","Pingente"]}, cores:3},
-  {id:"art-p", nome:"Quebra-nozes articulado P · trio", desc:"A versão menor do articulado. Boa para completar o pacote de presente.", img:"foto-articulados.webp", foto:true, fundo:"var(--bege)",
+  {id:"art-p", nome:"Quebra-nozes articulado P · trio", desc:"A versão menor do articulado. Na foto, o do meio tem argola: é a versão pingente.", img:"foto-trio-p.webp", foto:true, fundo:"var(--bege)",
    tamanhos:[{id:"trio",label:"Trio",preco:27}], opcao:{id:"uso",rot:"Uso",vals:["Decorativo","Pingente"]}, cores:3},
   {id:"ping", nome:"Pingente quebra-nozes 10 cm · trio", desc:"Três pingentes de 10 cm para pendurar na árvore.", img:"qn-praia.webp", foto:false, fundo:"var(--bege)",
    tamanhos:[{id:"trio",label:"Trio",preco:30}], cores:3},
-  {id:"base", nome:"Quebra-nozes de base", desc:"O quebra-nozes clássico, de pé na base, para enfeitar a mesa ou a estante.", img:"foto-base-rosa.webp", foto:true, fundo:"var(--bege)",
+  {id:"base", nome:"Quebra-nozes de base", desc:"O quebra-nozes clássico, de pé na base, para enfeitar a mesa ou a estante.", img:"foto-base-rosa-q.webp", foto:true, fundo:"var(--bege)",
    tamanhos:[{id:"pad",label:"Padrão",preco:null},{id:"g",label:"Grande",preco:null}], cores:1, corPadrao:"Rosa pastel"},
-  {id:"rena", nome:"Rena de balão", desc:"A rena da campanha, com o nariz vermelho, para pendurar ou deixar de pé.", img:"foto-rena.webp", foto:true, fundo:"var(--bege)",
+  {id:"rena", nome:"Rena de balão", desc:"A rena de balão da campanha. Na foto, a decorativa (laranja, de nariz vermelho) e a para pendurar (rosa, com argolinha nas costas).", img:"foto-renas.webp", foto:true, fundo:"var(--bege)",
    tamanhos:[{id:"u",label:"Tamanho único",preco:null}], opcao:{id:"uso",rot:"Uso",vals:["Decorativa","Para pendurar"]}, cores:1, corPadrao:"Laranja", rotCor:"Cor da rena"},
   {id:"tags", nome:"Kit de tags de presente", desc:"Seis tags com as ilustrações da campanha: Ho Ho Ho, Merry Christmas, quebra-nozes, rena e pinheiro.", img:"foto-tags.webp", foto:true, fundo:"var(--bege)",
    tamanhos:[{id:"kit6",label:"Kit com 6",preco:null}]}
