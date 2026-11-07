@@ -100,6 +100,10 @@ input:focus,textarea:focus,select:focus{border-color:var(--militar);outline:none
 .arte.sem-foto img{opacity:.35}
 .arte.com-foto{aspect-ratio:1/1}
 .arte.com-foto img{top:0;left:0;width:100%;height:100%;object-fit:cover}
+.foto-prox{position:absolute;inset:0;background:none;border:0;padding:0;cursor:pointer;z-index:1}
+.fotos-nav{position:absolute;left:0;right:0;bottom:10px;display:flex;justify-content:center;gap:6px;z-index:2}
+.ponto{width:9px;height:9px;border-radius:50%;border:0;padding:0;background:rgba(255,255,255,.6);box-shadow:0 0 0 1px rgba(0,0,0,.15)}
+.ponto[aria-pressed="true"]{background:var(--vinho);width:22px;border-radius:5px}
 .sem-preco{font-size:16px;font-weight:700;color:var(--tinta-suave)}
 .rodape{padding-block:20px 36px}
 .rodape .wrap{display:grid;gap:18px;justify-items:center;text-align:center}
@@ -256,19 +260,19 @@ const LETRAS = [{id:"laco",label:"Laço",dica:"cursiva"},{id:"qn",label:"Quebra-
    preco:null = preço ainda não definido (aparece, mas não entra na sacola)
    foto:false = sem foto do produto real ainda */
 const PRODUTOS = [
-  {id:"bola", nome:"Bola com nome", desc:"Bola plana impressa em 3D. Até 2 linhas, cerca de 9 letras por linha.", img:"foto-bola-sofia.webp", foto:true, fundo:"var(--bege)",
+  {id:"bola", nome:"Bola com nome", desc:"Bola plana impressa em 3D. Até 2 linhas, cerca de 9 letras por linha.", img:"f2-bola.webp", imgs:["f2-bola.webp","f2-amb-bola.webp"], foto:true, fundo:"var(--bege)",
    tamanhos:[{id:"u",label:"Tamanho único",preco:null}], peca:"bola", maxLetras:9, linhas:2},
   {id:"bengala", nome:"Bengala com nome", desc:"Bengala impressa em 3D para pendurar. Um nome, até 9 letras. Nome maior vai na bola.", img:"bengala.webp", foto:false, fundo:"var(--bege)",
    tamanhos:[{id:"u",label:"Tamanho único",preco:null}], peca:"bengala", maxLetras:9, linhas:1},
-  {id:"art-m", nome:"Quebra-nozes articulado M · trio", desc:"Três quebra-nozes com pernas que balançam. Na foto, o trio nas cores da campanha. Você escolhe a cor de cada um.", img:"foto-trio-m.webp", foto:true, fundo:"var(--bege)",
+  {id:"art-m", nome:"Quebra-nozes articulado M · trio", desc:"Três quebra-nozes com pernas que balançam. Na foto, o trio nas cores da campanha. Você escolhe a cor de cada um.", img:"f2-trio-m.webp", imgs:["f2-trio-m.webp","f2-amb-articulado.webp"], foto:true, fundo:"var(--bege)",
    tamanhos:[{id:"trio",label:"Trio",preco:30}], opcao:{id:"uso",rot:"Uso",vals:["Decorativo","Pingente"]}, cores:3},
-  {id:"art-p", nome:"Quebra-nozes articulado P · trio", desc:"A versão menor do articulado. Na foto, o do meio tem argola: é a versão pingente.", img:"foto-trio-p.webp", foto:true, fundo:"var(--bege)",
+  {id:"art-p", nome:"Quebra-nozes articulado P · trio", desc:"A versão menor do articulado, com as mesmas pernas que balançam. Também sai como pingente, com argola no chapéu.", img:"f2-trio-p.webp", imgs:["f2-trio-p.webp"], foto:true, fundo:"var(--bege)",
    tamanhos:[{id:"trio",label:"Trio",preco:27}], opcao:{id:"uso",rot:"Uso",vals:["Decorativo","Pingente"]}, cores:3},
-  {id:"ping", nome:"Pingente quebra-nozes 10 cm · trio", desc:"Três pingentes de 10 cm para pendurar na árvore.", img:"qn-praia.webp", foto:false, fundo:"var(--bege)",
+  {id:"ping", nome:"Pingente quebra-nozes 10 cm · trio", desc:"Três pingentes de 10 cm, com argola, para pendurar na árvore. Você escolhe a cor de cada um.", img:"f2-pingentes.webp", imgs:["f2-pingentes.webp"], foto:true, fundo:"var(--bege)",
    tamanhos:[{id:"trio",label:"Trio",preco:30}], cores:3},
-  {id:"base", nome:"Quebra-nozes de base", desc:"O quebra-nozes clássico, de pé na base, para enfeitar a mesa ou a estante.", img:"foto-base-rosa-q.webp", foto:true, fundo:"var(--bege)",
+  {id:"base", nome:"Quebra-nozes de base", desc:"O quebra-nozes clássico, de pé na base, para enfeitar a mesa ou a estante. Toque na foto para ver mais.", img:"f2-base.webp", imgs:["f2-base.webp","f2-base-duo.webp","f2-amb-base.webp"], foto:true, fundo:"var(--bege)",
    tamanhos:[{id:"pad",label:"Padrão",preco:null},{id:"g",label:"Grande",preco:null}], cores:1, corPadrao:"Rosa pastel"},
-  {id:"rena", nome:"Rena de balão", desc:"A rena de balão da campanha. Na foto, a decorativa (laranja, de nariz vermelho) e a para pendurar (rosa, com argolinha nas costas).", img:"foto-renas.webp", foto:true, fundo:"var(--bege)",
+  {id:"rena", nome:"Rena de balão", desc:"A rena de balão da campanha. Na foto, a decorativa (laranja, de nariz vermelho) e a para pendurar (rosa, com argolinha nas costas).", img:"f2-renas.webp", imgs:["f2-renas.webp","f2-rena-rosa.webp","f2-amb-rena.webp"], foto:true, fundo:"var(--bege)",
    tamanhos:[{id:"u",label:"Tamanho único",preco:null}], opcao:{id:"uso",rot:"Uso",vals:["Decorativa","Para pendurar"]}, cores:1, corPadrao:"Laranja", rotCor:"Cor da rena"},
   {id:"tags", nome:"Kit de tags de presente", desc:"Seis tags com as ilustrações da campanha: Ho Ho Ho, Merry Christmas, quebra-nozes, rena e pinheiro.", img:"foto-tags.webp", foto:true, fundo:"var(--bege)",
    tamanhos:[{id:"kit6",label:"Kit com 6",preco:null}]}
@@ -331,7 +335,7 @@ function cardHTML(p){
       <span class="erro" hidden></span>`:"";
   return `
   <article class="prod" data-id="${p.id}">
-    <div class="arte ${p.foto?"com-foto":(p.peca?"":"sem-foto")}" style="--fundo:${p.fundo}"><img src="assets/${p.img}" alt="${esc(p.nome)}" loading="lazy">${p.foto||p.peca?"":'<span class="breve">Foto da peça em breve</span>'}</div>
+    <div class="arte ${p.foto?"com-foto":(p.peca?"":"sem-foto")}" style="--fundo:${p.fundo}"><img src="assets/${p.imgs?p.imgs[e.foto||0]:p.img}" alt="${esc(p.nome)}" loading="lazy">${p.imgs&&p.imgs.length>1?`<div class="fotos-nav">${p.imgs.map((_,k)=>`<button class="ponto" data-foto="${k}" aria-label="Foto ${k+1} de ${p.imgs.length}" aria-pressed="${k===(e.foto||0)}"></button>`).join("")}</div><button class="foto-prox" data-foto="${((e.foto||0)+1)%p.imgs.length}" aria-label="Próxima foto"></button>`:""}${p.foto||p.peca?"":'<span class="breve">Foto da peça em breve</span>'}</div>
     <div class="corpo">
       <h3>${esc(p.nome)}</h3>
       <p>${esc(p.desc)}</p>
@@ -370,7 +374,8 @@ $("#grade").addEventListener("click",ev=>{
   const card=ev.target.closest(".prod");if(!card)return;
   const id=card.dataset.id,e=escolha[id],p=prod(id);
   const b=ev.target.closest("button");if(!b)return;
-  if(b.dataset.tam){e.tam=b.dataset.tam;rerenderCard(id);}
+  if(b.dataset.foto!==undefined){e.foto=+b.dataset.foto;rerenderCard(id);}
+  else if(b.dataset.tam){e.tam=b.dataset.tam;rerenderCard(id);}
   else if(b.dataset.op){e.op=b.dataset.op;rerenderCard(id);}
   else if(b.dataset.letra){e.letra=b.dataset.letra;rerenderCard(id);}
   else if(b.dataset.mais){e.mais=e.mais||{};e.mais[b.dataset.mais]=true;rerenderCard(id);}
