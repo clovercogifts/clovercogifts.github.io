@@ -247,13 +247,14 @@ const CONFIG = {
 /* ===== CORES DE FILAMENTO (campanha) ===== */
 /* c:1 = cor da campanha (aparece primeiro) · teste:1 = cor que pede impressão de teste */
 const FIL = [
-  {n:"Rosa pastel",h:"#F7CFE0",c:1},{n:"Verde oliva candy",h:"#8FA867",c:1},{n:"Verde oliva",h:"#3E4A33",c:1},{n:"Bordô silk",h:"#9E1F3F",c:1},
-  {n:"Vermelho",h:"#D23A2A",c:1},{n:"Laranja",h:"#F97A12",c:1},{n:"Branco",h:"#F5F5F2",c:1},{n:"Bege",h:"#E6D6BA",c:1},{n:"Ouro envelhecido silk",h:"#C9A23A",c:1},
-  {n:"Rosa choque",h:"#F2456A"},{n:"Rosa translúcido",h:"#F6D2D8",teste:1},{n:"Amarelo",h:"#F6E27A"},{n:"Caramelo",h:"#8A5233"},{n:"Marrom",h:"#9C6B4A"},
-  {n:"Verde bandeira",h:"#3E9E5E"},{n:"Azul claro",h:"#A9DDE3"},{n:"Azul royal",h:"#1F5FA8"},{n:"Lilás",h:"#B58CE0"},{n:"Íris purple",h:"#5B2A7A"},
-  {n:"Cinza",h:"#8E8E8E"},{n:"Preto",h:"#222222"},{n:"Branco translúcido",h:"#E8EBEE",teste:1},{n:"Brilha no escuro",h:"#DDE8F0",teste:1},
+  {n:"Rosa pastel",h:"#F5CCDD",c:1},{n:"Verde oliva candy",h:"#819762",c:1},{n:"Verde oliva",h:"#3F4F3B",c:1},{n:"Bordô silk",h:"#A63C5D",c:1},
+  {n:"Vermelho",h:"#B12217",c:1},{n:"Laranja",h:"#F76A14",c:1},{n:"Branco",h:"#F2F1EE",c:1},{n:"Bege",h:"#E3D2BE",c:1},{n:"Ouro envelhecido silk",h:"#E3A73E",c:1},
+  {n:"Rosa choque",h:"#FB678F"},{n:"Rosa translúcido",h:"#F9DCE9",teste:1},{n:"Amarelo",h:"#FFE67D"},{n:"Caramelo",h:"#9D7960"},{n:"Marrom",h:"#A17B5E"},
+  {n:"Verde bandeira",h:"#52A671"},{n:"Azul claro",h:"#AEDEE1"},{n:"Azul royal",h:"#174C89"},{n:"Lilás",h:"#D09FDD"},{n:"Íris purple",h:"#6B4175"},
+  {n:"Cinza",h:"#898687"},{n:"Preto",h:"#2D2D2D"},{n:"Branco translúcido",h:"#E8EBEE",teste:1},{n:"Brilha no escuro",h:"#DDE8F0",teste:1},
   {n:"Tricolor (vermelho, azul e dourado)",h:"linear-gradient(135deg,#C8302F 0 33%,#2E58A6 33% 66%,#C9A23A 66%)",teste:1}
 ];
+const slugCor = n => n.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,24);
 const hexFil = n => {const h=(FIL.find(f=>f.n===n)||{h:"#ccc"}).h;return h.startsWith("linear")?"#9B4FB0":h;};
 const fundoFil = n => (FIL.find(f=>f.n===n)||{h:"#ccc"}).h;
 const LETRAS = [{id:"laco",label:"Laço",dica:"cursiva"},{id:"qn",label:"Quebra-nozes",dica:"maiúsculas"},{id:"composto",label:"Composto",dica:"2 nomes"}];
@@ -322,7 +323,7 @@ function previewHTML(p,e){
 function selCor(p,campo,rot,e){
   const v=e[campo],f=FIL.find(x=>x.n===v)||{};
   const aberto=!!(e.mais&&e.mais[campo])||!f.c;
-  const bt=x=>`<button class="cor" data-campo="${campo}" data-v="${esc(x.n)}" style="background:${x.h}" aria-label="${esc(x.n)}" aria-pressed="${x.n===v}" title="${esc(x.n)}"></button>`;
+  const bt=x=>`<button class="cor" data-campo="${campo}" data-v="${esc(x.n)}" style="background:url(assets/fil/${slugCor(x.n)}.webp) center/cover, ${x.h}" aria-label="${esc(x.n)}" aria-pressed="${x.n===v}" title="${esc(x.n)}"></button>`;
   return `<div class="campo"><span class="rot">${rot}: <span style="text-transform:none;letter-spacing:0">${esc(v)}</span></span>
     <div class="sel-cor">${FIL.filter(x=>x.c).map(bt).join("")}</div>
     ${aberto?`<span class="grupo-cor">Outras cores</span><div class="sel-cor">${FIL.filter(x=>!x.c).map(bt).join("")}</div>`
