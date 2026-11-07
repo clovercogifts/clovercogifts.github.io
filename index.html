@@ -82,7 +82,7 @@ button{cursor:pointer}
 .cor-nome{font-size:13px;color:var(--tinta-suave)}
 input[type=text],input[type=tel],textarea,select{width:100%;border:2px solid var(--linha);border-radius:10px;background:var(--papel);padding:10px 12px}
 input:focus,textarea:focus,select:focus{border-color:var(--militar);outline:none}
-.prev{display:grid;place-items:center;width:132px;height:132px;border-radius:50%;margin:4px auto 0;padding:12px;text-align:center;line-height:1;overflow:hidden;overflow-wrap:anywhere;box-shadow:inset 0 0 0 6px rgba(0,0,0,.06)}
+.prev{display:grid;place-items:center;width:132px;height:132px;border-radius:50%;margin:14px auto 4px;padding:12px;text-align:center;line-height:1;overflow:hidden;overflow-wrap:anywhere;box-shadow:inset 0 0 0 6px rgba(0,0,0,.06)}
 .prev.bengala{width:100%;height:auto;min-height:58px;border-radius:999px;padding:10px 18px}
 .prev .l1{display:block}
 .prev.laco{font-family:var(--letra-laco);font-size:38px}
@@ -262,21 +262,21 @@ const LETRAS = [{id:"laco",label:"Laço",dica:"cursiva"},{id:"qn",label:"Quebra-
    preco:null = preço ainda não definido (aparece, mas não entra na sacola)
    foto:false = sem foto do produto real ainda */
 const PRODUTOS = [
-  {id:"bola", nome:"E se tiver seu nome?", desc:"Bola plana impressa em 3D com o nome que você escolher. Até 2 linhas, cerca de 9 letras por linha.",
+  {id:"bola", nome:"Bola E se… tiver seu nome?", desc:"Bola plana impressa em 3D com o nome que você escolher. Até 2 linhas, cerca de 9 letras por linha.",
    imgs:["f2-bola.webp"], foto:true, fundo:"var(--bege)",
    tamanhos:[{id:"u",label:"Tamanho único",medida:"10 × 10 cm",preco:10}], peca:"bola", maxLetras:9, linhas:2},
   {id:"articulado", nome:"Quebra-nozes articulado · trio", desc:"Três quebra-nozes com pernas que balançam. Ficam sentados na estante ou, na versão pingente, pendurados na árvore.",
-   imgs:["f2-trio-pmg.webp","f2-trio-m.webp","f2-trio-p.webp"], foto:true, fundo:"var(--bege)",
+   imgs:["f2-trio-pmg.webp","f2-trio-m.webp","f2-trio-p.webp","f2-trio-argola.webp"], foto:true, fundo:"var(--bege)",
    tamanhos:[{id:"P",label:"P",medida:"5 cm sentado · 8 cm pendurado",preco:27,foto:2},{id:"M",label:"M",medida:"7 cm sentado · 10 cm pendurado",preco:30,foto:1},
              {id:"G",label:"G",medida:"9 cm sentado · 12 cm pendurado",preco:33},{id:"PMG",label:"Um de cada (P, M e G)",medida:"um P, um M e um G",preco:30,foto:0}],
-   opcao:{id:"uso",rot:"Uso",vals:["Decorativo","Pingente"]}, cores:3},
+   opcao:{id:"uso",rot:"Uso",vals:["Decorativo","Pingente"],fotos:{"Pingente":3}}, cores:3},
   {id:"pingente", nome:"Quebra-nozes pingente · trio", desc:"Três quebra-nozes com argola no chapéu, para pendurar na árvore.",
    imgs:["f2-pingentes.webp"], foto:true, fundo:"var(--bege)",
    tamanhos:[{id:"u",label:"Trio",medida:"10 cm de altura",preco:30}], cores:3},
-  {id:"base", nome:"Quebra-nozes de base", desc:"O quebra-nozes clássico, de pé na base, para a mesa ou a estante. No tamanho 16 cm, a base pode levar um nome.",
+  {id:"base", nome:"Quebra-nozes de base", desc:"O quebra-nozes clássico, de pé na base, para a mesa ou a estante.",
    imgs:["f2-base.webp","f2-base-duo.webp"], foto:true, fundo:"var(--bege)",
-   tamanhos:[{id:"16",label:"16 cm",medida:"16 cm de altura · base de 5 cm",preco:null},{id:"G",label:"Grande",medida:"a confirmar",preco:null}],
-   opcao2:{rot:"Nome na base",vals:["Sem nome","Com nome"],soTam:"16",max:12}, cores:1, corPadrao:"Rosa pastel"},
+   tamanhos:[{id:"16",label:"16 cm",medida:"16 cm de altura · base de 5 cm",preco:null},{id:"25",label:"25 cm",medida:"25 cm de altura",preco:null}],
+   cores:1, corPadrao:"Rosa pastel"},
   {id:"rena", nome:"Rena de balão", desc:"A rena de balão da campanha, com nariz vermelho. Pingente, com argolinha nas costas, ou decorativa, para ficar de pé.",
    imgs:["f2-renas.webp","f2-rena-rosa.webp"], foto:true, fundo:"var(--bege)",
    tamanhos:[{id:"P",label:"P",medida:"6 cm de comprimento × 5 cm de largura × 8 cm de altura",preco:null},{id:"M",label:"M",medida:"11 cm de comprimento × 8 cm de largura × 14 cm de altura",preco:null},
@@ -296,7 +296,7 @@ function toast(msg){const t=$("#toast");t.textContent=msg;t.hidden=false;clearTi
 
 /* ===== estado ===== */
 const escolha = {};
-PRODUTOS.forEach(p=>escolha[p.id]={tam:p.tamanhos[0].id,op:p.opcao?p.opcao.vals[0]:"",fundo:"Rosa pastel",cornome:"Vermelho",c1:"Rosa pastel",c2:"Verde oliva candy",c3:"Laranja",cor:p.corPadrao||"Rosa pastel",op2:p.opcao2?p.opcao2.vals[0]:"",letra:"laco",nome:"",nome2:"",qtd:1});
+PRODUTOS.forEach(p=>escolha[p.id]={letra:"laco",tam:p.tamanhos[0].id,op:p.opcao?p.opcao.vals[0]:"",fundo:"Rosa pastel",cornome:"Vermelho",c1:"Rosa pastel",c2:"Verde oliva candy",c3:"Laranja",cor:p.corPadrao||"Rosa pastel",op2:p.opcao2?p.opcao2.vals[0]:"",letra:"laco",nome:"",nome2:"",qtd:1});
 let sacola = [];
 let etapa = "sacola"; // sacola | dados | pagar
 let cliente = {nome:"",fone:"",entrega:"retirada",obs:"",pagamento:"pix"};
@@ -313,7 +313,7 @@ const totalQtd = () => sacola.reduce((s,i)=>s+i.qtd,0);
 
 /* ===== vitrine ===== */
 function previewHTML(p,e){
-  const st=`background:${fundoFil(e.fundo)};color:${hexFil(e.cornome)}`;
+  const st=`background:${fundoFil(e.fundo)};color:${hexFil(e.cornome)};${p.peca==="bola"?`box-shadow:0 0 0 7px ${hexFil(e.cornome)}`:""}`;
   const cls=`prev ${p.peca==="bengala"?"bengala":""} ${p.peca==="bengala"?"laco":e.letra}`;
   if(p.peca==="bola"&&e.letra==="composto")
     return `<div class="${cls}" style="${st}"><span><span class="l1">${esc(e.nome||"Maria")}</span><span class="l2">${esc(e.nome2||"Eduarda")}</span></span></div>`;
@@ -334,7 +334,7 @@ function cardHTML(p){
   const preco=precoDe(p,e.tam);
   const tSel=p.tamanhos.find(t=>t.id===e.tam)||p.tamanhos[0];
   const nomes=p.peca?`
-      ${p.peca==="bola"?`<div class="campo"><span class="rot">Letra</span><div class="opcoes">${LETRAS.map(l=>`<button class="op" data-letra="${l.id}" aria-pressed="${l.id===e.letra}">${l.label} <small>· ${l.dica}</small></button>`).join("")}</div></div>`:""}
+      ${p.peca==="bola"?`<div class="campo"><span class="rot">Letra</span><span style="font-size:14px">Laço · cursiva</span></div>`:""}
       <div class="campo"><label class="rot" for="nome-${p.id}">${p.peca==="bola"&&e.letra==="composto"?"1º nome":"Nome"}</label>
         <input type="text" id="nome-${p.id}" data-n="nome" maxlength="${p.peca==="bola"&&e.letra!=="composto"?19:p.maxLetras}" value="${esc(e.nome)}" placeholder="${p.peca==="bengala"?"Até 9 letras":"Até 2 linhas de 9 letras"}" autocomplete="off"></div>
       ${p.peca==="bola"&&e.letra==="composto"?`<div class="campo"><label class="rot" for="nome2-${p.id}">2º nome</label><input type="text" id="nome2-${p.id}" data-n="nome2" maxlength="9" value="${esc(e.nome2)}" autocomplete="off"></div>`:""}
@@ -393,7 +393,7 @@ $("#grade").addEventListener("click",ev=>{
   if(b.dataset.foto!==undefined){e.foto=+b.dataset.foto;rerenderCard(id);}
   else if(b.dataset.tam){e.tam=b.dataset.tam;const t=p.tamanhos.find(x=>x.id===e.tam);if(t&&t.soUso)e.op=t.soUso;if(t&&t.foto!=null)e.foto=t.foto;rerenderCard(id);}
   else if(b.dataset.op2){e.op2=b.dataset.op2;rerenderCard(id);}
-  else if(b.dataset.op){e.op=b.dataset.op;rerenderCard(id);}
+  else if(b.dataset.op){e.op=b.dataset.op;if(p.opcao.fotos&&p.opcao.fotos[e.op]!=null)e.foto=p.opcao.fotos[e.op];rerenderCard(id);}
   else if(b.dataset.letra){e.letra=b.dataset.letra;rerenderCard(id);}
   else if(b.dataset.mais){e.mais=e.mais||{};e.mais[b.dataset.mais]=true;rerenderCard(id);}
   else if(b.dataset.campo){e[b.dataset.campo]=b.dataset.v;rerenderCard(id);}
