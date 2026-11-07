@@ -266,9 +266,9 @@ const PRODUTOS = [
    imgs:["f2-bola.webp"], foto:true, fundo:"var(--bege)",
    tamanhos:[{id:"u",label:"Tamanho único",medida:"10 × 10 cm",preco:10}], peca:"bola", maxLetras:9, linhas:2},
   {id:"articulado", nome:"Quebra-nozes articulado · trio", desc:"Três quebra-nozes com pernas que balançam. Ficam sentados na estante ou, na versão pingente, pendurados na árvore.",
-   imgs:["f2-trio-m.webp","f2-trio-p.webp"], foto:true, fundo:"var(--bege)",
+   imgs:["f2-trio-m.webp","f2-trio-p.webp","f2-trio-pmg.webp"], foto:true, fundo:"var(--bege)",
    tamanhos:[{id:"P",label:"P",medida:"5 cm sentado · 8 cm pendurado",preco:27},{id:"M",label:"M",medida:"7 cm sentado · 10 cm pendurado",preco:30},
-             {id:"G",label:"G",medida:"9 cm sentado · 12 cm pendurado",preco:33},{id:"PMG",label:"Um de cada (P, M e G)",medida:"um P, um M e um G",preco:30}],
+             {id:"G",label:"G",medida:"9 cm sentado · 12 cm pendurado",preco:33},{id:"PMG",label:"Um de cada (P, M e G)",medida:"um P, um M e um G",preco:30,foto:2}],
    opcao:{id:"uso",rot:"Uso",vals:["Decorativo","Pingente"]}, cores:3},
   {id:"pingente", nome:"Quebra-nozes pingente · trio", desc:"Três quebra-nozes com argola no chapéu, para pendurar na árvore.",
    imgs:["f2-pingentes.webp"], foto:true, fundo:"var(--bege)",
@@ -391,7 +391,7 @@ $("#grade").addEventListener("click",ev=>{
   const id=card.dataset.id,e=escolha[id],p=prod(id);
   const b=ev.target.closest("button");if(!b)return;
   if(b.dataset.foto!==undefined){e.foto=+b.dataset.foto;rerenderCard(id);}
-  else if(b.dataset.tam){e.tam=b.dataset.tam;const t=p.tamanhos.find(x=>x.id===e.tam);if(t&&t.soUso)e.op=t.soUso;rerenderCard(id);}
+  else if(b.dataset.tam){e.tam=b.dataset.tam;const t=p.tamanhos.find(x=>x.id===e.tam);if(t&&t.soUso)e.op=t.soUso;if(t&&t.foto!=null)e.foto=t.foto;rerenderCard(id);}
   else if(b.dataset.op2){e.op2=b.dataset.op2;rerenderCard(id);}
   else if(b.dataset.op){e.op=b.dataset.op;rerenderCard(id);}
   else if(b.dataset.letra){e.letra=b.dataset.letra;rerenderCard(id);}
